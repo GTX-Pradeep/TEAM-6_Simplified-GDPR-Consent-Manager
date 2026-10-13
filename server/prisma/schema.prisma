@@ -1,0 +1,141 @@
+// Data model of the Simplified GDPR Consent Manager (SAD v1.0, Section 3.3.1 and 3.6).
+// consent_records and audit_entries are APPEND-ONLY: the init migration adds database
+// triggers that reject UPDATE and DELETE on them (SRS FR-11, SEC-6).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  DPO
+}
+
+enum PolicyStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum ConsentAction {
+  GRANTED
+  WITHDRAWN
+}
+
+enum AuditOutcome {
+  SUCCESS
+  FAILURE
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  role             Role      @default(USER)
+  isActive         Boolean   @default(true) @map("is_active")
+  failedLoginCount Int       @default(0) @map("failed_login_count")
+  lockedUntil      DateTime? @map("locked_until") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  consents       ConsentRecord[]
+  auditEntries   AuditEntry[]
+  policies       PolicyVersion[]
+  reviewNotices  PolicyReviewNotice[]
+
+  @@map("users")
+}
+
+model ProcessingPurpose {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  name        String
+  description String
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  consents ConsentRecord[]
+
+  @@map("processing_purposes")
+}
+
+model PolicyVersion {
+  id            String       @id @default(uuid()) @db.Uuid
+  versionNo     String       @unique @map("version_no")
+  title         String
+  body          String
+  changeSummary String       @map("change_summary")
+  status        PolicyStatus @default(DRAFT)
+  effectiveAt   DateTime?    @map("effective_at") @db.Timestamptz(3)
+  createdById   String       @map("created_by_id") @db.Uuid
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  createdBy     User                 @relation(fields: [createdById], references: [id])
+  consents      ConsentRecord[]
+  reviewNotices PolicyReviewNotice[]
+
+  @@map("policy_versions")
+}
+
+/// One immutable consent decision. Current and historical state are derived from these rows.
+model ConsentRecord {
+  id              BigInt        @id @default(autoincrement())
+  userId          String        @map("user_id") @db.Uuid
+  purposeId       String        @map("purpose_id") @db.Uuid
+  action          ConsentAction
+  policyVersionId String        @map("policy_version_id") @db.Uuid
+  recordedAt      DateTime      @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  prevHash        String        @map("prev_hash")
+  hash            String
+
+  user          User              @relation(fields: [userId], references: [id])
+  purpose       ProcessingPurpose @relation(fields: [purposeId], references: [id])
+  policyVersion PolicyVersion     @relation(fields: [policyVersionId], references: [id])
+
+  @@index([userId, purposeId, recordedAt(sort: Desc)])
+  @@index([recordedAt])
+  @@map("consent_records")
+}
+
+/// Append-only, hash-chained audit trail (FR-17).
+model AuditEntry {
+  id         BigInt       @id @default(autoincrement())
+  actorId    String?      @map("actor_id") @db.Uuid
+  action     String
+  targetType String       @map("target_type")
+  targetId   String       @map("target_id")
+  outcome    AuditOutcome
+  details    Json?
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  prevHash   String       @map("prev_hash")
+  hash       String
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([action])
+  @@map("audit_entries")
+}
+
+/// Created when a new policy is published, for users whose consents refer to an older version (FR-16).
+model PolicyReviewNotice {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  policyVersionId String    @map("policy_version_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt  DateTime? @map("acknowledged_at") @db.Timestamptz(3)
+
+  user          User          @relation(fields: [userId], references: [id])
+  policyVersion PolicyVersion @relation(fields: [policyVersionId], references: [id])
+
+  @@unique([userId, policyVersionId])
+  @@map("policy_review_notices")
+}
