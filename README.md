@@ -83,7 +83,17 @@ Open http://localhost:5173 - the badge in the top-right corner shows whether the
 
 ## API
 
-Base path `/api/v1`. Implemented so far: `GET /health`. The full endpoint list is in the SAD (Section 4.3).
+Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Implemented so far:
+
+| Method | Path | Who | What it does |
+|---|---|---|---|
+| GET | `/health` | anyone | API + database status |
+| POST | `/auth/register` | anyone | create a USER account `{name, email, password}` and log in |
+| POST | `/auth/login` | anyone | log in `{email, password}`; sets an httpOnly session cookie |
+| POST | `/auth/logout` | logged in | ends the session (old cookies stop working immediately) |
+| GET | `/auth/me` | logged in | the current user `{id, name, email, role}` |
+
+Errors always look like `{"error": {"code": "EMAIL_TAKEN", "message": "...", "requestId": "..."}}`.
 
 ## How we work
 

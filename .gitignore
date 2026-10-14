@@ -13,6 +13,8 @@ coverage/
 !.env.example
 
 # logs
+# cookie file used when testing the API with curl
+cookies.txt
 *.log
 npm-debug.log*
 
