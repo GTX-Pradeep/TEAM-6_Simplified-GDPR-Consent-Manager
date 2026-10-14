@@ -42,6 +42,8 @@ model User {
   isActive         Boolean   @default(true) @map("is_active")
   failedLoginCount Int       @default(0) @map("failed_login_count")
   lockedUntil      DateTime? @map("locked_until") @db.Timestamptz(3)
+  /// Increased on logout so that every token issued before it stops working (FR-3).
+  sessionVersion   Int       @default(0) @map("session_version")
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   consents       ConsentRecord[]
