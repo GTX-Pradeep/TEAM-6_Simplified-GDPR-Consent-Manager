@@ -12,6 +12,8 @@ type Row = {
   role: "USER" | "ADMIN" | "DPO";
   isActive: boolean;
   sessionVersion: number;
+  failedLoginCount: number;
+  lockedUntil: Date | null;
 };
 const users: Row[] = [];
 
@@ -22,11 +24,32 @@ jest.mock("../../lib/prisma", () => ({
       findUnique: jest.fn(async ({ where }: { where: { id?: string; email?: string } }) =>
         users.find((u) => (where.id ? u.id === where.id : u.email === where.email)) ?? null,
       ),
-      create: jest.fn(async ({ data }: { data: Omit<Row, "id" | "isActive" | "sessionVersion"> }) => {
-        const row: Row = { id: `user-${users.length + 1}`, isActive: true, sessionVersion: 0, ...data };
+      create: jest.fn(async ({ data }: { data: Pick<Row, "name" | "email" | "passwordHash" | "role"> }) => {
+        const row: Row = {
+          id: `user-${users.length + 1}`,
+          isActive: true,
+          sessionVersion: 0,
+          failedLoginCount: 0,
+          lockedUntil: null,
+          ...data,
+        };
         users.push(row);
         return row;
       }),
+      update: jest.fn(
+        async ({ where, data }: { where: { id: string }; data: Record<string, unknown> }) => {
+          const row = users.find((u) => u.id === where.id);
+          if (!row) throw new Error("not found");
+          for (const [key, value] of Object.entries(data)) {
+            const v = value as { increment?: number };
+            (row as Record<string, unknown>)[key] =
+              v && typeof v === "object" && "increment" in v
+                ? ((row as Record<string, unknown>)[key] as number) + (v.increment ?? 0)
+                : value;
+          }
+          return row;
+        },
+      ),
       updateMany: jest.fn(async ({ where }: { where: { id: string; sessionVersion: number } }) => {
         const row = users.find((u) => u.id === where.id && u.sessionVersion === where.sessionVersion);
         if (row) row.sessionVersion += 1;
@@ -171,5 +194,61 @@ describe("GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3)", () => {
   it("logout without a session is harmless", async () => {
     const res = await request(app).post("/api/v1/auth/logout");
     expect(res.status).toBe(204);
+  });
+});
+
+describe("account lockout (SEC-3)", () => {
+  const good = { email: "alice@example.com", password: alice.password };
+  const bad = { email: "alice@example.com", password: "wrong-password" };
+  const login = (body: object) => request(app).post("/api/v1/auth/login").send(body);
+
+  beforeEach(async () => {
+    await request(app).post("/api/v1/auth/register").send(alice);
+  });
+
+  it("locks the account after 5 wrong passwords; the 6th attempt is refused even with the right password", async () => {
+    for (let i = 0; i < 5; i++) expect((await login(bad)).status).toBe(401);
+
+    const res = await login(good);
+    expect(res.status).toBe(423);
+    expect(res.body.error.code).toBe("ACCOUNT_LOCKED");
+    expect(res.body.error.message).toMatch(/15 minutes/);
+    expect(res.headers["set-cookie"]).toBeUndefined();
+  });
+
+  it("allows login again once the 15 minutes have passed", async () => {
+    for (let i = 0; i < 5; i++) await login(bad);
+    users[0].lockedUntil = new Date(Date.now() - 1000); // pretend the lock expired
+
+    const res = await login(good);
+    expect(res.status).toBe(200);
+    expect(users[0].lockedUntil).toBeNull();
+    expect(users[0].failedLoginCount).toBe(0);
+  });
+
+  it("a successful login resets the failure counter", async () => {
+    for (let i = 0; i < 4; i++) await login(bad);
+    expect(users[0].failedLoginCount).toBe(4);
+
+    expect((await login(good)).status).toBe(200);
+    expect(users[0].failedLoginCount).toBe(0);
+
+    // so 4 more failures do not lock it
+    for (let i = 0; i < 4; i++) await login(bad);
+    expect((await login(good)).status).toBe(200);
+  });
+});
+
+describe("session expiry (SEC-3)", () => {
+  it("rejects a token that has expired", async () => {
+    await request(app).post("/api/v1/auth/register").send(alice);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const jwt = require("jsonwebtoken") as typeof import("jsonwebtoken");
+    const expired = jwt.sign(
+      { sub: "user-1", role: "USER", sv: 0, exp: Math.floor(Date.now() / 1000) - 60 },
+      process.env.JWT_SECRET as string,
+    );
+    const res = await request(app).get("/api/v1/auth/me").set("Cookie", `gdpr_session=${expired}`);
+    expect(res.status).toBe(401);
   });
 });

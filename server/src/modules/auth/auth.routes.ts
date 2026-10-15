@@ -1,14 +1,11 @@
-import { Router, type NextFunction, type Request, type Response } from "express";
+import { Router } from "express";
+import { asyncHandler as wrap } from "../../lib/asyncHandler";
 import { SESSION_COOKIE, clearSessionCookie, setSessionCookie, verifySession } from "../../lib/session";
 import { requireAuth } from "../../middleware/requireAuth";
 import { loginSchema, registerSchema } from "./auth.schemas";
 import * as auth from "./auth.service";
 
 export const authRouter = Router();
-
-type Handler = (req: Request, res: Response) => Promise<unknown>;
-/** Passes errors from async handlers to the error handler. */
-const wrap = (fn: Handler) => (req: Request, res: Response, next: NextFunction) => fn(req, res).catch(next);
 
 /** POST /api/v1/auth/register  {name, email, password} -> 201 {user}  (FR-1, SEC-1) */
 authRouter.post(
@@ -21,7 +18,10 @@ authRouter.post(
   }),
 );
 
-/** POST /api/v1/auth/login  {email, password} -> 200 {user}  (FR-2) */
+/**
+ * POST /api/v1/auth/login  {email, password} -> 200 {user}  (FR-2)
+ * 401 INVALID_CREDENTIALS for a wrong e-mail/password, 423 ACCOUNT_LOCKED after 5 failures (SEC-3).
+ */
 authRouter.post(
   "/login",
   wrap(async (req, res) => {

@@ -32,16 +32,68 @@ export async function register(input: RegisterInput): Promise<User> {
 // password take the same time and return the same message (no account enumeration).
 const DUMMY_HASH = bcrypt.hashSync("dummy-password-for-timing", 10);
 
-/** FR-2: returns the user if the e-mail and password are correct. */
+/** SEC-3: after this many wrong passwords in a row the account is locked ... */
+export const MAX_FAILED_LOGINS = 5;
+/** ... for this many minutes. */
+export const LOCK_MINUTES = 15;
+
+/** FR-2 + SEC-3: returns the user if the e-mail and password are correct and the account is not locked. */
 export async function login(input: LoginInput): Promise<User> {
   const user = await prisma.user.findUnique({ where: { email: input.email } });
+
+  // A locked account is refused before the password is even checked, so guessing
+  // the right password during the lock period does not help.
+  if (user?.lockedUntil && user.lockedUntil > new Date()) {
+    throw accountLocked(user.lockedUntil);
+  }
+
   const ok = await bcrypt.compare(input.password, user?.passwordHash ?? DUMMY_HASH);
 
-  if (!user || !ok || !user.isActive) {
-    // Account lockout after 5 failures (SEC-3) is added in issue #6.
-    throw new AppError(401, "INVALID_CREDENTIALS", "E-mail or password is incorrect");
+  if (!user || !user.isActive) throw invalidCredentials();
+
+  if (!ok) {
+    await recordFailedLogin(user.id);
+    throw invalidCredentials();
+  }
+
+  // Successful login: forget earlier failures.
+  if (user.failedLoginCount > 0 || user.lockedUntil) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginCount: 0, lockedUntil: null },
+    });
   }
   return user;
+}
+
+/** Counts a wrong password; on the 5th one in a row the account is locked for 15 minutes. */
+async function recordFailedLogin(userId: string): Promise<void> {
+  // increment is done by the database, so two parallel attempts are both counted
+  const { failedLoginCount } = await prisma.user.update({
+    where: { id: userId },
+    data: { failedLoginCount: { increment: 1 } },
+  });
+  if (failedLoginCount >= MAX_FAILED_LOGINS) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginCount: 0, lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60_000) },
+    });
+    // TODO(#13): write an AUTH_LOCKED entry to the audit trail.
+  }
+}
+
+function invalidCredentials() {
+  return new AppError(401, "INVALID_CREDENTIALS", "E-mail or password is incorrect");
+}
+
+function accountLocked(until: Date) {
+  const minutes = Math.max(1, Math.ceil((until.getTime() - Date.now()) / 60_000));
+  return new AppError(
+    423,
+    "ACCOUNT_LOCKED",
+    `Too many failed attempts. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+    { lockedUntil: until.toISOString() },
+  );
 }
 
 /**
