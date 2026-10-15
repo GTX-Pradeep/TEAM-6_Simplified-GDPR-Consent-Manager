@@ -93,6 +93,10 @@ Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Impleme
 | POST | `/auth/logout` | logged in | ends the session (old cookies stop working immediately) |
 | GET | `/auth/me` | logged in | the current user `{id, name, email, role}` |
 
+Security rules: passwords are stored only as bcrypt hashes; 5 wrong passwords in a row lock the account for
+15 minutes (`423 ACCOUNT_LOCKED`); a session expires after 15 minutes without activity; every protected route
+checks the role on the server (`403 FORBIDDEN` otherwise) and a USER can only reach his or her own data.
+
 Errors always look like `{"error": {"code": "EMAIL_TAKEN", "message": "...", "requestId": "..."}}`.
 
 ## How we work
