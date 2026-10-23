@@ -92,6 +92,18 @@ Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Impleme
 | POST | `/auth/login` | anyone | log in `{email, password}`; sets an httpOnly session cookie |
 | POST | `/auth/logout` | logged in | ends the session (old cookies stop working immediately) |
 | GET | `/auth/me` | logged in | the current user `{id, name, email, role}` |
+| GET | `/purposes` | logged in | active processing purposes (`?all=true` for ADMIN includes deactivated) |
+| POST | `/purposes` | ADMIN | create `{code, name, description}` |
+| PATCH | `/purposes/:id` | ADMIN | change name / description |
+| PATCH | `/purposes/:id/deactivate` | ADMIN | deactivate (purposes are never deleted) |
+| GET | `/policies/current` | logged in | the published privacy policy |
+| GET | `/policies/:id` | logged in | any policy version |
+| GET | `/policies` | ADMIN, DPO | all versions, newest first |
+| POST | `/policies` | ADMIN | new draft `{versionNo, title, body, changeSummary}` |
+| PATCH | `/policies/:id` | ADMIN | edit a draft (published versions are locked) |
+| POST | `/policies/:id/publish` | ADMIN | publish a draft; the previous version becomes SUPERSEDED |
+| GET | `/me/consents` | USER | my current choice for every active purpose + the current policy version |
+| POST | `/me/consents` | USER | `{purposeId, action: "GRANTED" \| "WITHDRAWN"}` records a new, hash-chained consent decision |
 
 Security rules: passwords are stored only as bcrypt hashes; 5 wrong passwords in a row lock the account for
 15 minutes (`423 ACCOUNT_LOCKED`); a session expires after 15 minutes without activity; every protected route
