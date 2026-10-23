@@ -9,6 +9,7 @@ import { logger } from "./lib/logger";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
 import { purposesRouter } from "./modules/purposes/purposes.routes";
+import { policiesRouter } from "./modules/policies/policies.routes";
 import { healthRouter } from "./routes/health";
 
 /**
@@ -51,7 +52,7 @@ export function createApp() {
   api.use("/auth", authRouter); // FR-1..3, SEC-1
   api.use("/purposes", purposesRouter); // FR-4, FR-6
   // Feature modules still to be mounted during the sprints:
-  // api.use("/policies", policiesRouter);  FR-5, FR-13..16
+   api.use("/policies", policiesRouter); // FR-5, FR-13..16
   // api.use("/me/consents", consentRouter); FR-7..12
   // api.use("/audit", auditRouter);        FR-17..19
   app.use("/api/v1", api);
