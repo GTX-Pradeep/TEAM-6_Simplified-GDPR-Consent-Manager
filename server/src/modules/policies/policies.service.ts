@@ -1,6 +1,7 @@
 import { Prisma, type PolicyVersion } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { appendAudit } from "../audit/audit.service";
 import type { CreatePolicyInput, UpdatePolicyInput } from "./policies.schemas";
 
 /** FR-13: all versions, newest first (admin / DPO screen). */
@@ -25,19 +26,38 @@ export async function getPolicy(id: string): Promise<PolicyVersion> {
 /** FR-13: admin creates a new DRAFT version. */
 export async function createDraft(input: CreatePolicyInput, createdById: string): Promise<PolicyVersion> {
   try {
-    // TODO(#13): write a POLICY_DRAFT_CREATED entry to the audit trail.
-    return await prisma.policyVersion.create({ data: { ...input, createdById, status: "DRAFT" } });
+    return await prisma.$transaction(async (tx) => {
+      const policy = await tx.policyVersion.create({ data: { ...input, createdById, status: "DRAFT" } });
+      await appendAudit(tx, {
+        actorId: createdById,
+        action: "POLICY_DRAFT_CREATED",
+        targetType: "PolicyVersion",
+        targetId: policy.id,
+        details: { versionNo: policy.versionNo },
+      });
+      return policy;
+    });
   } catch (err) {
     throw mapDbError(err, input.versionNo);
   }
 }
 
 /** FR-13 / FR-15: a draft can be edited; published and superseded versions are locked. */
-export async function updateDraft(id: string, input: UpdatePolicyInput): Promise<PolicyVersion> {
+export async function updateDraft(id: string, input: UpdatePolicyInput, actorId: string): Promise<PolicyVersion> {
   const policy = await getPolicy(id);
   if (policy.status !== "DRAFT") throw locked(policy);
   try {
-    return await prisma.policyVersion.update({ where: { id }, data: input });
+    return await prisma.$transaction(async (tx) => {
+      const updated = await tx.policyVersion.update({ where: { id }, data: input });
+      await appendAudit(tx, {
+        actorId,
+        action: "POLICY_DRAFT_UPDATED",
+        targetType: "PolicyVersion",
+        targetId: id,
+        details: { versionNo: updated.versionNo, fields: Object.keys(input) },
+      });
+      return updated;
+    });
   } catch (err) {
     throw mapDbError(err, input.versionNo);
   }
@@ -48,20 +68,27 @@ export async function updateDraft(id: string, input: UpdatePolicyInput): Promise
  * SUPERSEDED and this one becomes PUBLISHED, so there is never zero or two published
  * versions. (The database triggers also enforce both rules.)
  */
-export async function publish(id: string): Promise<PolicyVersion> {
+export async function publish(id: string, actorId: string): Promise<PolicyVersion> {
   try {
     return await prisma.$transaction(async (tx) => {
       const policy = await tx.policyVersion.findUnique({ where: { id } });
       if (!policy) throw new AppError(404, "POLICY_NOT_FOUND", "Policy version not found");
       if (policy.status !== "DRAFT") throw locked(policy);
 
+      const previous = await tx.policyVersion.findFirst({ where: { status: "PUBLISHED" } });
       await tx.policyVersion.updateMany({ where: { status: "PUBLISHED" }, data: { status: "SUPERSEDED" } });
       const published = await tx.policyVersion.update({
         where: { id },
         data: { status: "PUBLISHED", effectiveAt: new Date() },
       });
       // TODO(#20): create re-confirmation notices for affected users (FR-16).
-      // TODO(#13): write a POLICY_PUBLISHED entry to the audit trail.
+      await appendAudit(tx, {
+        actorId,
+        action: "POLICY_PUBLISHED",
+        targetType: "PolicyVersion",
+        targetId: id,
+        details: { versionNo: published.versionNo, supersedes: previous?.versionNo ?? null },
+      });
       return published;
     });
   } catch (err) {

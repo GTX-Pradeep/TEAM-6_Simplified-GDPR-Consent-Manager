@@ -30,7 +30,7 @@ purposesRouter.post(
   authorize("ADMIN"),
   asyncHandler(async (req, res) => {
     const input = createPurposeSchema.parse(req.body);
-    res.status(201).json({ purpose: await purposes.createPurpose(input) });
+    res.status(201).json({ purpose: await purposes.createPurpose(input, req.user!.id) });
   }),
 );
 
@@ -41,7 +41,7 @@ purposesRouter.patch(
   asyncHandler(async (req, res) => {
     const { id } = idParam.parse(req.params);
     const input = updatePurposeSchema.parse(req.body);
-    res.json({ purpose: await purposes.updatePurpose(id, input) });
+    res.json({ purpose: await purposes.updatePurpose(id, input, req.user!.id) });
   }),
 );
 
@@ -51,6 +51,6 @@ purposesRouter.patch(
   authorize("ADMIN"),
   asyncHandler(async (req, res) => {
     const { id } = idParam.parse(req.params);
-    res.json({ purpose: await purposes.deactivatePurpose(id) });
+    res.json({ purpose: await purposes.deactivatePurpose(id, req.user!.id) });
   }),
 );

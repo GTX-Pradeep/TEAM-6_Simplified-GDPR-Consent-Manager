@@ -52,7 +52,7 @@ policiesRouter.patch(
   asyncHandler(async (req, res) => {
     const { id } = idParamSchema.parse(req.params);
     const input = updatePolicySchema.parse(req.body);
-    res.json({ policy: await policies.updateDraft(id, input) });
+    res.json({ policy: await policies.updateDraft(id, input, req.user!.id) });
   }),
 );
 
@@ -62,6 +62,6 @@ policiesRouter.post(
   authorize("ADMIN"),
   asyncHandler(async (req, res) => {
     const { id } = idParamSchema.parse(req.params);
-    res.json({ policy: await policies.publish(id) });
+    res.json({ policy: await policies.publish(id, req.user!.id) });
   }),
 );

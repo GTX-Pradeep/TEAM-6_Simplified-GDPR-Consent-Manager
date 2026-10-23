@@ -1,6 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { Role } from "@prisma/client";
 import { logger } from "../lib/logger";
+import { recordAuditSafely } from "../modules/audit/audit.service";
 import { AppError } from "./errorHandler";
 import { requireAuth } from "./requireAuth";
 
@@ -19,7 +20,14 @@ export function requireRole(...allowed: Role[]): RequestHandler {
     if (!req.user) return next(new AppError(401, "UNAUTHENTICATED", "Please log in"));
 
     if (!allowed.includes(req.user.role)) {
-      // TODO(#13): also write an ACCESS_DENIED entry to the audit trail.
+      void recordAuditSafely({
+        actorId: req.user.id,
+        action: "ACCESS_DENIED",
+        targetType: "Route",
+        targetId: `${req.method} ${req.baseUrl}${req.route?.path ?? ""}`,
+        outcome: "FAILURE",
+        details: { role: req.user.role, allowed },
+      });
       logger.warn(
         { userId: req.user.id, role: req.user.role, allowed, path: req.originalUrl },
         "access denied",
@@ -44,6 +52,14 @@ export function requireSelfOrRole(param: string, ...privileged: Role[]): Request
     if (!req.user) return next(new AppError(401, "UNAUTHENTICATED", "Please log in"));
     if (req.params[param] === req.user.id || privileged.includes(req.user.role)) return next();
 
+    void recordAuditSafely({
+      actorId: req.user.id,
+      action: "ACCESS_DENIED",
+      targetType: "UserData",
+      targetId: String(req.params[param]),
+      outcome: "FAILURE",
+      details: { role: req.user.role },
+    });
     logger.warn({ userId: req.user.id, path: req.originalUrl }, "access to another user's data denied");
     next(new AppError(403, "FORBIDDEN", "You can only access your own data"));
   };

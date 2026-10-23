@@ -22,6 +22,12 @@ const usersTable = [
   { id: "user-1", name: "User", email: "user@x.com", role: "USER", isActive: true, sessionVersion: 0 },
 ];
 
+// The audit trail has its own tests (audit.service.test.ts); here we only check it is called.
+jest.mock("../audit/audit.service", () => ({
+  appendAudit: jest.fn(async () => undefined),
+  recordAuditSafely: jest.fn(async () => undefined),
+}));
+
 jest.mock("../../lib/prisma", () => {
   const match = (p: Policy, where: Partial<Policy>) =>
     Object.entries(where).every(([k, v]) => (p as Record<string, unknown>)[k] === v);
@@ -205,5 +211,30 @@ describe("reading policies (FR-5)", () => {
     const { body } = await createDraft(v1);
     expect((await request(app).get(`/api/v1/policies/${body.policy.id}`).set("Cookie", asUser)).status).toBe(200);
     expect((await request(app).get(`/api/v1/policies/${body.policy.id}`)).status).toBe(401);
+  });
+});
+
+describe("audit trail (FR-17)", () => {
+  it("creating, editing and publishing are audited with the admin as actor", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { appendAudit } = require("../audit/audit.service") as { appendAudit: jest.Mock };
+    appendAudit.mockClear();
+
+    const first = (await createDraft(v1)).body.policy;
+    await request(app).patch(`/api/v1/policies/${first.id}`).set("Cookie", asAdmin).send({ title: "x" });
+    await publish(first.id);
+    const second = (await createDraft(v2)).body.policy;
+    await publish(second.id);
+
+    const calls = appendAudit.mock.calls.map((c) => c[1]);
+    expect(calls.map((c) => c.action)).toEqual([
+      "POLICY_DRAFT_CREATED",
+      "POLICY_DRAFT_UPDATED",
+      "POLICY_PUBLISHED",
+      "POLICY_DRAFT_CREATED",
+      "POLICY_PUBLISHED",
+    ]);
+    expect(calls.every((c) => c.actorId === "admin-1")).toBe(true);
+    expect(calls[4].details).toEqual({ versionNo: "2.0", supersedes: "1.0" });
   });
 });

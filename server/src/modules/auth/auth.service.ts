@@ -3,6 +3,7 @@ import { Prisma, type User } from "@prisma/client";
 import { config } from "../../config";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { appendAudit, recordAuditSafely } from "../audit/audit.service";
 import type { AuthUser } from "../../types/express";
 import type { LoginInput, RegisterInput } from "./auth.schemas";
 
@@ -18,8 +19,13 @@ export async function register(input: RegisterInput): Promise<User> {
 
   const passwordHash = await bcrypt.hash(input.password, config.BCRYPT_ROUNDS);
   try {
-    return await prisma.user.create({
-      data: { name: input.name, email: input.email, passwordHash, role: "USER" },
+    // The account and its audit entry are saved together (FR-17).
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { name: input.name, email: input.email, passwordHash, role: "USER" },
+      });
+      await appendAudit(tx, { actorId: user.id, action: "USER_REGISTERED", targetType: "User", targetId: user.id });
+      return user;
     });
   } catch (err) {
     // Two registrations with the same e-mail at the same moment: the unique index wins.
@@ -44,15 +50,29 @@ export async function login(input: LoginInput): Promise<User> {
   // A locked account is refused before the password is even checked, so guessing
   // the right password during the lock period does not help.
   if (user?.lockedUntil && user.lockedUntil > new Date()) {
+    await recordAuditSafely({
+      actorId: user.id,
+      action: "LOGIN_REFUSED_LOCKED",
+      targetType: "User",
+      targetId: user.id,
+      outcome: "FAILURE",
+    });
     throw accountLocked(user.lockedUntil);
   }
 
   const ok = await bcrypt.compare(input.password, user?.passwordHash ?? DUMMY_HASH);
 
-  if (!user || !user.isActive) throw invalidCredentials();
-
-  if (!ok) {
-    await recordFailedLogin(user.id);
+  if (!user || !user.isActive || !ok) {
+    // No e-mail address in the audit details (NFR-9): an unknown e-mail is logged as "unknown".
+    await recordAuditSafely({
+      actorId: user?.id ?? null,
+      action: "LOGIN_FAILED",
+      targetType: "User",
+      targetId: user?.id ?? "unknown",
+      outcome: "FAILURE",
+      details: { reason: !user ? "UNKNOWN_EMAIL" : !user.isActive ? "INACTIVE" : "WRONG_PASSWORD" },
+    });
+    if (user && user.isActive) await recordFailedLogin(user.id);
     throw invalidCredentials();
   }
 
@@ -63,6 +83,7 @@ export async function login(input: LoginInput): Promise<User> {
       data: { failedLoginCount: 0, lockedUntil: null },
     });
   }
+  await recordAuditSafely({ actorId: user.id, action: "LOGIN_SUCCEEDED", targetType: "User", targetId: user.id });
   return user;
 }
 
@@ -78,7 +99,14 @@ async function recordFailedLogin(userId: string): Promise<void> {
       where: { id: userId },
       data: { failedLoginCount: 0, lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60_000) },
     });
-    // TODO(#13): write an AUTH_LOCKED entry to the audit trail.
+    await recordAuditSafely({
+      actorId: userId,
+      action: "ACCOUNT_LOCKED",
+      targetType: "User",
+      targetId: userId,
+      outcome: "FAILURE",
+      details: { minutes: LOCK_MINUTES },
+    });
   }
 }
 
@@ -101,10 +129,13 @@ function accountLocked(until: Date) {
  * session version. Only acts if the token is still current (logging out twice is harmless).
  */
 export async function logout(userId: string, sessionVersion: number): Promise<void> {
-  await prisma.user.updateMany({
+  const { count } = await prisma.user.updateMany({
     where: { id: userId, sessionVersion },
     data: { sessionVersion: { increment: 1 } },
   });
+  if (count > 0) {
+    await recordAuditSafely({ actorId: userId, action: "LOGGED_OUT", targetType: "User", targetId: userId });
+  }
 }
 
 function emailTaken() {
