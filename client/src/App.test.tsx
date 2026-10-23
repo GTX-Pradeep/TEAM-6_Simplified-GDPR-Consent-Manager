@@ -4,7 +4,12 @@ import { vi } from "vitest";
 import App from "./App";
 
 vi.mock("./api/client", () => ({
+  api: {},
   getHealth: vi.fn().mockResolvedValue({ status: "ok", db: "up", time: new Date().toISOString() }),
+}));
+vi.mock("./api/auth", async (orig) => ({
+  ...(await orig<typeof import("./api/auth")>()),
+  me: vi.fn().mockResolvedValue(null),
 }));
 
 describe("App", () => {

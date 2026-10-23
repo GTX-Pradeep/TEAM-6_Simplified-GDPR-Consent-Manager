@@ -1,3 +1,7 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { homeFor } from "../auth/roles";
+
 const features = [
   {
     title: "Granular consent",
@@ -22,6 +26,7 @@ const features = [
 ];
 
 export function HomePage() {
+  const { user } = useAuth();
   return (
     <div>
       <section className="bg-gradient-to-b from-brand-50 to-slate-50">
@@ -35,12 +40,20 @@ export function HomePage() {
             versioned policies for admins, and an audit trail you can trust.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <button type="button" className="btn-primary" disabled title="Available after Sprint 1">
-              Get started
-            </button>
-            <a className="btn-secondary" href="/api/v1/health" target="_blank" rel="noreferrer">
-              API health
-            </a>
+            {user ? (
+              <Link to={homeFor(user.role)} className="btn-primary">
+                Go to my dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/register" className="btn-primary">
+                  Get started
+                </Link>
+                <Link to="/login" className="btn-secondary">
+                  Log in
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
