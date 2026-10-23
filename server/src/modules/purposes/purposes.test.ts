@@ -19,8 +19,14 @@ const usersTable = [
   { id: "user-1", name: "User", email: "user@x.com", role: "USER", isActive: true, sessionVersion: 0 },
 ];
 
-jest.mock("../../lib/prisma", () => ({
-  prisma: {
+// The audit trail has its own tests (audit.service.test.ts); here we only check it is called.
+jest.mock("../audit/audit.service", () => ({
+  appendAudit: jest.fn(async () => undefined),
+  recordAuditSafely: jest.fn(async () => undefined),
+}));
+
+jest.mock("../../lib/prisma", () => {
+  const prisma: Record<string, unknown> = {
     user: {
       findUnique: jest.fn(async ({ where }: { where: { id: string } }) =>
         usersTable.find((u) => u.id === where.id) ?? null,
@@ -61,8 +67,10 @@ jest.mock("../../lib/prisma", () => ({
         return row;
       }),
     },
-  },
-}));
+  };
+  prisma.$transaction = jest.fn(async (fn: (tx: unknown) => unknown) => fn(prisma));
+  return { prisma };
+});
 
 process.env.DATABASE_URL = "postgresql://test@localhost/test";
 process.env.JWT_SECRET = "test-secret-that-is-at-least-32-characters";
@@ -186,5 +194,24 @@ describe("PATCH /api/v1/purposes/:id and /deactivate (FR-6)", () => {
     const id = body.purpose.id;
     expect((await request(app).patch(`/api/v1/purposes/${id}`).set("Cookie", asUser).send({ name: "x" })).status).toBe(403);
     expect((await request(app).patch(`/api/v1/purposes/${id}/deactivate`).set("Cookie", asUser)).status).toBe(403);
+  });
+});
+
+describe("audit trail (FR-17)", () => {
+  it("every admin change writes an audit entry with the admin as actor", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { appendAudit } = require("../audit/audit.service") as { appendAudit: jest.Mock };
+    appendAudit.mockClear();
+
+    const { body } = await create(marketing);
+    const id = body.purpose.id;
+    await request(app).patch(`/api/v1/purposes/${id}`).set("Cookie", asAdmin).send({ name: "New name" });
+    await request(app).patch(`/api/v1/purposes/${id}/deactivate`).set("Cookie", asAdmin);
+
+    expect(appendAudit.mock.calls.map((c) => [c[1].action, c[1].actorId, c[1].targetId])).toEqual([
+      ["PURPOSE_CREATED", "admin-1", id],
+      ["PURPOSE_UPDATED", "admin-1", id],
+      ["PURPOSE_DEACTIVATED", "admin-1", id],
+    ]);
   });
 });

@@ -17,8 +17,14 @@ type Row = {
 };
 const users: Row[] = [];
 
-jest.mock("../../lib/prisma", () => ({
-  prisma: {
+// The audit trail has its own tests (audit.service.test.ts); here we only check it is called.
+jest.mock("../audit/audit.service", () => ({
+  appendAudit: jest.fn(async () => undefined),
+  recordAuditSafely: jest.fn(async () => undefined),
+}));
+
+jest.mock("../../lib/prisma", () => {
+  const prisma: Record<string, unknown> = {
     $queryRaw: jest.fn(),
     user: {
       findUnique: jest.fn(async ({ where }: { where: { id?: string; email?: string } }) =>
@@ -56,8 +62,10 @@ jest.mock("../../lib/prisma", () => ({
         return { count: row ? 1 : 0 };
       }),
     },
-  },
-}));
+  };
+  prisma.$transaction = jest.fn(async (fn: (tx: unknown) => unknown) => fn(prisma));
+  return { prisma };
+});
 
 process.env.DATABASE_URL = "postgresql://test@localhost/test";
 process.env.JWT_SECRET = "test-secret-that-is-at-least-32-characters";
@@ -250,5 +258,49 @@ describe("session expiry (SEC-3)", () => {
     );
     const res = await request(app).get("/api/v1/auth/me").set("Cookie", `gdpr_session=${expired}`);
     expect(res.status).toBe(401);
+  });
+});
+
+describe("audit trail (FR-17)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const audit = require("../audit/audit.service") as { appendAudit: jest.Mock; recordAuditSafely: jest.Mock };
+  const actions = () => [
+    ...audit.appendAudit.mock.calls.map((c) => c[1].action),
+    ...audit.recordAuditSafely.mock.calls.map((c) => c[0].action),
+  ];
+
+  beforeEach(() => {
+    audit.appendAudit.mockClear();
+    audit.recordAuditSafely.mockClear();
+  });
+
+  it("records registration, successful and failed logins, lockout and logout", async () => {
+    const reg = await request(app).post("/api/v1/auth/register").send(alice);
+    const good = { email: "alice@example.com", password: alice.password };
+    await request(app).post("/api/v1/auth/login").send(good);
+    await request(app).post("/api/v1/auth/logout").set("Cookie", sessionCookie(reg));
+    for (let i = 0; i < 5; i++) {
+      await request(app).post("/api/v1/auth/login").send({ ...good, password: "wrong-password" });
+    }
+    await request(app).post("/api/v1/auth/login").send(good);
+
+    expect(actions()).toEqual(
+      expect.arrayContaining([
+        "USER_REGISTERED",
+        "LOGIN_SUCCEEDED",
+        "LOGGED_OUT",
+        "LOGIN_FAILED",
+        "ACCOUNT_LOCKED",
+        "LOGIN_REFUSED_LOCKED",
+      ]),
+    );
+  });
+
+  it("never writes the e-mail address or password into the audit trail (NFR-9)", async () => {
+    await request(app).post("/api/v1/auth/login").send({ email: "nobody@example.com", password: "whatever-1" });
+    const logged = JSON.stringify(audit.recordAuditSafely.mock.calls);
+    expect(logged).not.toContain("nobody@example.com");
+    expect(logged).not.toContain("whatever-1");
+    expect(logged).toContain("UNKNOWN_EMAIL");
   });
 });

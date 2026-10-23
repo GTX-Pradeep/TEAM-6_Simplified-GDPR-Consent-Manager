@@ -9,6 +9,7 @@ process.env.JWT_SECRET = "test-secret-that-is-at-least-32-characters";
 process.env.NODE_ENV = "test";
 
 jest.mock("../lib/prisma", () => ({ prisma: {} }));
+jest.mock("../modules/audit/audit.service", () => ({ recordAuditSafely: jest.fn(async () => undefined) }));
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { requireRole, requireSelfOrRole } = require("./requireRole") as typeof import("./requireRole");
@@ -75,5 +76,19 @@ describe("requireSelfOrRole (SEC-2: a user sees only his or her own data)", () =
   it("DPO and ADMIN can open anyone's data", async () => {
     expect((await request(appAs(dpo)).get("/users/u1/consents")).status).toBe(200);
     expect((await request(appAs(admin)).get("/users/u1/consents")).status).toBe(200);
+  });
+});
+
+describe("denied access is audited (SEC-2, FR-17)", () => {
+  it("writes an ACCESS_DENIED entry", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { recordAuditSafely } = require("../modules/audit/audit.service") as { recordAuditSafely: jest.Mock };
+    recordAuditSafely.mockClear();
+    await request(appAs(user)).get("/admin-only");
+    await request(appAs(user)).get("/users/someone-else/consents");
+    expect(recordAuditSafely.mock.calls.map((c) => [c[0].action, c[0].actorId, c[0].outcome])).toEqual([
+      ["ACCESS_DENIED", "u1", "FAILURE"],
+      ["ACCESS_DENIED", "u1", "FAILURE"],
+    ]);
   });
 });
