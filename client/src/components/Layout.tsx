@@ -55,9 +55,9 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
       <main className="flex-1">{children}</main>
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-4 text-xs text-slate-500 sm:px-6">
-          Simplified GDPR Consent Manager &middot; Team 6 academic project. This is a simplified system and not a
-          legal GDPR compliance certification.
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500 sm:px-6">
+          <span>&copy; {new Date().getFullYear()} Consent Manager</span>
+          <span>Supports GDPR-style consent management. Not a legal compliance certification.</span>
         </div>
       </footer>
     </div>
