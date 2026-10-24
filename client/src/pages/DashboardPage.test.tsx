@@ -14,6 +14,7 @@ vi.mock("../api/client", () => ({
 }));
 vi.mock("../api/auth", async (orig) => ({ ...(await orig<typeof import("../api/auth")>()), me: vi.fn() }));
 vi.mock("../api/consents", () => ({ getMyConsents: vi.fn(), setConsent: vi.fn() }));
+vi.mock("../api/policies", () => ({ listPolicies: vi.fn(), getCurrentPolicy: vi.fn() }));
 
 const auth = vi.mocked(authApi);
 const api = vi.mocked(consentsApi);

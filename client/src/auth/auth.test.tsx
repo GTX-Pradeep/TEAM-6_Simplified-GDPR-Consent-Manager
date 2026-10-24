@@ -11,6 +11,7 @@ vi.mock("../api/client", () => ({
   api: {},
   getHealth: vi.fn().mockResolvedValue({ status: "ok", db: "up", time: new Date().toISOString() }),
 }));
+vi.mock("../api/policies", () => ({ listPolicies: vi.fn().mockResolvedValue([]), getCurrentPolicy: vi.fn() }));
 vi.mock("../api/consents", () => ({
   getMyConsents: vi.fn().mockResolvedValue({ purposes: [], currentPolicy: null }),
   setConsent: vi.fn(),
@@ -67,7 +68,7 @@ describe("login (FR-2)", () => {
     api.login.mockResolvedValue(ravi);
     renderAt("/login");
     fill("admin@demo.com", "Demo@12345");
-    expect(await screen.findByRole("heading", { name: /admin console/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /privacy policy versions/i })).toBeInTheDocument();
   });
 
   it("shows the server's message for wrong credentials or a locked account", async () => {

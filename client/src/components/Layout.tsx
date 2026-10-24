@@ -25,6 +25,14 @@ export function Layout({ children }: { children: ReactNode }) {
             <StatusPill />
             {user ? (
               <>
+                <NavLink
+                  to="/policy"
+                  className={({ isActive }) =>
+                    `hidden text-sm font-medium sm:inline ${isActive ? "text-brand-700" : "text-slate-600 hover:text-brand-700"}`
+                  }
+                >
+                  Privacy policy
+                </NavLink>
                 <span className="hidden text-sm text-slate-600 sm:inline">
                   {user.name} <span className="text-slate-400">&middot; {roleLabel[user.role]}</span>
                 </span>
