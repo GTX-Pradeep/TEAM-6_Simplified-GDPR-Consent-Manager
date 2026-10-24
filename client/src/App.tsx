@@ -2,15 +2,17 @@ import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
+import { AdminPoliciesPage } from "./pages/AdminPoliciesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { PolicyPage } from "./pages/PolicyPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RoleHomePage } from "./pages/RoleHomePage";
 
 /**
- * Routes. Still to come: /policy (FR-5) · /history (FR-12) · /admin/* (FR-6, FR-13, FR-14, SEC-4)
+ * Routes. Still to come: /history (FR-12) · /admin/* (FR-6, FR-13, FR-14, SEC-4)
  * · /dpo/* (FR-18 to FR-20)
  */
 export default function App() {
@@ -33,7 +35,15 @@ export default function App() {
             path="/admin"
             element={
               <RequireAuth roles={["ADMIN"]}>
-                <RoleHomePage title="Admin console" comingIn="issue #12 (policy editor)" />
+                <AdminPoliciesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/policy"
+            element={
+              <RequireAuth>
+                <PolicyPage />
               </RequireAuth>
             }
           />
