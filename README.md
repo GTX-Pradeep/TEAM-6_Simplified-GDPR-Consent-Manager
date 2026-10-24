@@ -64,11 +64,24 @@ npm run db:up
 npm run db:migrate -w server
 npm run db:generate -w server
 
-# 5. run API (http://localhost:4000) and web app (http://localhost:5173) together
+# 5. (optional) add demo accounts, purposes and a published policy
+npm run db:seed -w server
+
+# 6. run API (http://localhost:4000) and web app (http://localhost:5173) together
 npm run dev
 ```
 
 Open http://localhost:5173 - the badge in the top-right corner shows whether the API and database are online.
+
+### Demo accounts (after `npm run db:seed -w server`)
+
+| E-mail | Role | Password |
+|---|---|---|
+| `user@demo.com` | USER - consent dashboard | `Demo@12345` |
+| `admin@demo.com` | ADMIN - purposes and policies | `Demo@12345` |
+| `dpo@demo.com` | DPO - read-only audit views | `Demo@12345` |
+
+The seed is safe to run again (it only adds what is missing) and refuses to run in production.
 
 ### Useful scripts
 
@@ -78,6 +91,7 @@ Open http://localhost:5173 - the badge in the top-right corner shows whether the
 | `npm test` | all unit tests (server and client) |
 | `npm run typecheck` | TypeScript checks for both apps |
 | `npm run build` | production build |
+| `npm run db:seed -w server` | add demo accounts, purposes and policy 1.0 |
 | `npm run db:studio -w server` | browse the database in Prisma Studio |
 | `npm run db:down` | stop the database container |
 
