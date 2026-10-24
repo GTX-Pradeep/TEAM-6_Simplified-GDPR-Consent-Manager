@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
+import { DashboardPage } from "./pages/DashboardPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -24,7 +25,7 @@ export default function App() {
             path="/dashboard"
             element={
               <RequireAuth roles={["USER"]}>
-                <RoleHomePage title="Welcome" comingIn="issue #9 (Consent Dashboard)" />
+                <DashboardPage />
               </RequireAuth>
             }
           />
