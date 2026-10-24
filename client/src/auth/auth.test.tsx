@@ -11,6 +11,10 @@ vi.mock("../api/client", () => ({
   api: {},
   getHealth: vi.fn().mockResolvedValue({ status: "ok", db: "up", time: new Date().toISOString() }),
 }));
+vi.mock("../api/consents", () => ({
+  getMyConsents: vi.fn().mockResolvedValue({ purposes: [], currentPolicy: null }),
+  setConsent: vi.fn(),
+}));
 vi.mock("../api/auth", async (orig) => ({
   ...(await orig<typeof import("../api/auth")>()),
   me: vi.fn(),
@@ -55,7 +59,7 @@ describe("login (FR-2)", () => {
     api.login.mockResolvedValue(asha);
     renderAt("/login");
     fill("user@demo.com", "Demo@12345");
-    expect(await screen.findByRole("heading", { name: /welcome, asha/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /hello, asha/i })).toBeInTheDocument();
     expect(api.login).toHaveBeenCalledWith({ email: "user@demo.com", password: "Demo@12345" });
   });
 
@@ -104,7 +108,7 @@ describe("register (FR-1)", () => {
     fireEvent.change(screen.getByLabelText(/^password/i), { target: { value: "Demo@12345" } });
     fireEvent.change(screen.getByLabelText(/confirm password/i), { target: { value: "Demo@12345" } });
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
-    expect(await screen.findByRole("heading", { name: /welcome, asha/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /hello, asha/i })).toBeInTheDocument();
   });
 
   it("shows 'e-mail already used' from the API", async () => {
@@ -128,7 +132,7 @@ describe("protected pages and logout (FR-3)", () => {
   it("sends a USER away from the admin console to their own dashboard", async () => {
     api.me.mockResolvedValue(asha);
     renderAt("/admin");
-    expect(await screen.findByRole("heading", { name: /welcome, asha/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /hello, asha/i })).toBeInTheDocument();
   });
 
   it("logging out ends the session and returns to the login page", async () => {

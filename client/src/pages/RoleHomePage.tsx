@@ -3,7 +3,7 @@ import { roleLabel } from "../auth/roles";
 
 /**
  * Temporary home screens. Each one is replaced by its real screen in a later issue:
- * /dashboard -> #9 Consent Dashboard, /admin -> #12 policy editor, /dpo -> #22 DPO console.
+ * /admin -> #12 policy editor, /dpo -> #22 DPO console.
  */
 export function RoleHomePage({ title, comingIn }: { title: string; comingIn: string }) {
   const { user } = useAuth();
