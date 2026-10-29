@@ -231,7 +231,7 @@ export function AdminPoliciesPage() {
                       </span>
                     )
                   ) : (
-                    <span className="text-xs text-slate-400" title="Published versions cannot be changed">
+                    <span className="text-xs text-slate-500" title="Published versions cannot be changed">
                       Locked
                     </span>
                   )}
