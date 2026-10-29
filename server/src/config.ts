@@ -10,6 +10,10 @@ const schema = z.object({
   CLIENT_ORIGIN: z.string().url().default("http://localhost:5173"),
   /** Minutes of inactivity after which a login session expires (SRS SEC-3). */
   SESSION_TTL_MINUTES: z.coerce.number().int().positive().default(15),
+  /** SEC-7 / brute force: login + register attempts allowed per IP per minute. */
+  AUTH_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(10),
+  /** All other API requests allowed per IP per minute. */
+  API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(300),
   /** bcrypt work factor (SRS SEC-1). Tests use a lower value to stay fast. */
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(12),
 });

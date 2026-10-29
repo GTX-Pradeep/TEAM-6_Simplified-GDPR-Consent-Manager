@@ -7,6 +7,7 @@ import pinoHttp from "pino-http";
 import { config } from "./config";
 import { logger } from "./lib/logger";
 import { errorHandler, notFound } from "./middleware/errorHandler";
+import { apiRateLimit, authRateLimit, csrfOriginCheck, requireHttps } from "./middleware/security";
 import { authRouter } from "./modules/auth/auth.routes";
 import { consentsRouter } from "./modules/consents/consents.routes";
 import { policiesRouter } from "./modules/policies/policies.routes";
@@ -24,6 +25,7 @@ export function createApp() {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
 
+  app.use(requireHttps); //                SEC-5
   app.use(helmet());
   app.use(cors({ origin: config.CLIENT_ORIGIN, credentials: true }));
   app.use(express.json({ limit: "100kb" }));
@@ -49,6 +51,9 @@ export function createApp() {
   );
 
   const api = express.Router();
+  api.use(csrfOriginCheck()); //            SEC-7
+  api.use(apiRateLimit());
+  api.use(["/auth/login", "/auth/register"], authRateLimit());
   api.use("/health", healthRouter);
   api.use("/auth", authRouter); //          FR-1..3, SEC-1
   api.use("/purposes", purposesRouter); //  FR-4, FR-6
