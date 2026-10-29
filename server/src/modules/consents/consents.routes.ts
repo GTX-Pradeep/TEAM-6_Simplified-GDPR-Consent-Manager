@@ -1,7 +1,8 @@
+
 import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler";
 import { authorize } from "../../middleware/requireRole";
-import { consentActionSchema } from "./consents.schemas";
+import { consentActionSchema, historyQuerySchema } from "./consents.schemas";
 import * as consents from "./consents.service";
 
 /**
@@ -10,7 +11,17 @@ import * as consents from "./consents.service";
  */
 export const consentsRouter = Router();
 
-/** GET /api/v1/me/consents -> 200 {purposes: [{purpose, status, updatedAt, policyVersion}], currentPolicy} (FR-4) */
+/** GET /api/v1/me/consents/history -> consent history (FR-12). */
+consentsRouter.get(
+  "/history",
+  authorize("USER"),
+  asyncHandler(async (req, res) => {
+    const { limit } = historyQuerySchema.parse(req.query);
+    res.json({ history: await consents.getHistory(req.user!.id, limit) });
+  }),
+);
+
+/** GET /api/v1/me/consents -> current consent state (FR-4). */
 consentsRouter.get(
   "/",
   authorize("USER"),
@@ -19,7 +30,7 @@ consentsRouter.get(
   }),
 );
 
-/** POST /api/v1/me/consents {purposeId, action: "GRANTED"|"WITHDRAWN"} -> 201 {consent} (FR-7..FR-10) */
+/** POST /api/v1/me/consents -> record a consent decision (FR-7..FR-10). */
 consentsRouter.post(
   "/",
   authorize("USER"),
