@@ -34,7 +34,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   Privacy policy
                 </NavLink>
                 <span className="hidden text-sm text-slate-600 sm:inline">
-                  {user.name} <span className="text-slate-400">&middot; {roleLabel[user.role]}</span>
+                  {user.name} <span className="text-slate-500">&middot; {roleLabel[user.role]}</span>
                 </span>
                 <button type="button" onClick={onLogout} className="btn-secondary px-3 py-1.5">
                   Log out
