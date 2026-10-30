@@ -12,6 +12,7 @@ import { authRouter } from "./modules/auth/auth.routes";
 import { consentsRouter } from "./modules/consents/consents.routes";
 import { policiesRouter } from "./modules/policies/policies.routes";
 import { purposesRouter } from "./modules/purposes/purposes.routes";
+import { auditRouter, consentRecordsRouter } from "./modules/query/query.routes";
 import { healthRouter } from "./routes/health";
 
 /**
@@ -59,8 +60,8 @@ export function createApp() {
   api.use("/purposes", purposesRouter); //  FR-4, FR-6
   api.use("/policies", policiesRouter); //  FR-5, FR-13..16
   api.use("/me/consents", consentsRouter); // FR-4, FR-7..11
-  // Feature modules still to be mounted during the sprints:
-  // api.use("/audit", auditRouter);        FR-17..19
+  api.use("/consents", consentRecordsRouter); // FR-18 (DPO, read-only)
+  api.use("/audit", auditRouter); //            FR-17, FR-18 (DPO, read-only)
   app.use("/api/v1", api);
 
   app.use(notFound);

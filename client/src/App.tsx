@@ -1,18 +1,18 @@
-
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import { AdminPoliciesPage } from "./pages/AdminPoliciesPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { DpoConsolePage } from "./pages/DpoConsolePage";
 import HistoryPage from "./pages/HistoryPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PolicyPage } from "./pages/PolicyPage";
 import { RegisterPage } from "./pages/RegisterPage";
-import { RoleHomePage } from "./pages/RoleHomePage";
 
+/** Routes. Each screen is guarded by role; the API checks the role again on every request. */
 export default function App() {
   return (
     <AuthProvider>
@@ -21,7 +21,6 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-
           <Route
             path="/dashboard"
             element={
@@ -30,7 +29,6 @@ export default function App() {
               </RequireAuth>
             }
           />
-
           <Route
             path="/history"
             element={
@@ -39,7 +37,6 @@ export default function App() {
               </RequireAuth>
             }
           />
-
           <Route
             path="/admin"
             element={
@@ -48,7 +45,6 @@ export default function App() {
               </RequireAuth>
             }
           />
-
           <Route
             path="/policy"
             element={
@@ -57,22 +53,18 @@ export default function App() {
               </RequireAuth>
             }
           />
-
           <Route
             path="/dpo"
             element={
               <RequireAuth roles={["DPO"]}>
-                <RoleHomePage
-                  title="DPO console"
-                  comingIn="Sprint 2 (issue #22)"
-                />
+                <DpoConsolePage />
               </RequireAuth>
             }
           />
-
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
     </AuthProvider>
   );
 }
+
