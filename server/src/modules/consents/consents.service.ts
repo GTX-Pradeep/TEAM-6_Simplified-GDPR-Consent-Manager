@@ -1,3 +1,4 @@
+
 import type { ConsentAction, ConsentRecord, PolicyVersion, ProcessingPurpose } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
@@ -15,6 +16,15 @@ export interface ConsentDto {
   purposeId: string;
   action: ConsentAction;
   recordedAt: Date;
+  policyVersion: { id: string; versionNo: string };
+}
+
+/** One line of the user's consent history (FR-12). */
+export interface HistoryItemDto {
+  id: string;
+  action: ConsentAction;
+  recordedAt: Date;
+  purpose: { id: string; code: string; name: string };
   policyVersion: { id: string; versionNo: string };
 }
 
@@ -138,6 +148,32 @@ export async function getCurrentState(
       };
     }),
   };
+}
+
+/**
+ * FR-12: Return the user's consent history, newest first.
+ */
+export async function getHistory(
+  userId: string,
+  limit = 100,
+): Promise<HistoryItemDto[]> {
+  const rows = await prisma.consentRecord.findMany({
+    where: { userId },
+    orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
+    take: limit,
+    include: {
+      purpose: { select: { id: true, code: true, name: true } },
+      policyVersion: { select: { id: true, versionNo: true } },
+    },
+  });
+
+  return rows.map((r) => ({
+    id: r.id.toString(),
+    action: r.action,
+    recordedAt: r.recordedAt,
+    purpose: r.purpose,
+    policyVersion: r.policyVersion,
+  }));
 }
 
 function toDto(record: ConsentRecord, policy: Pick<PolicyVersion, "id" | "versionNo">): ConsentDto {
