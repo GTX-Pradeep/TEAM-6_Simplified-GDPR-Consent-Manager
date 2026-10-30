@@ -56,6 +56,9 @@ jest.mock("../../lib/prisma", () => {
 });
 
 /* eslint-disable @typescript-eslint/no-var-requires */
+process.env.NODE_ENV = "test";
+process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
+process.env.JWT_SECRET = "test-secret-key-for-query-tests-at-least-32-characters";
 const { createApp } = require("../../app") as typeof import("../../app");
 const { signSession } = require("../../lib/session") as typeof import("../../lib/session");
 /* eslint-enable @typescript-eslint/no-var-requires */
