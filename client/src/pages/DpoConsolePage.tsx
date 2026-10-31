@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { describeError } from "../api/auth";
 import { listAuditEntries, listConsentRecords, type AuditRow, type ConsentRecordRow, type Page } from "../api/dpo";
 import { FormAlert } from "../components/AuthCard";
+import { IntegrityCheck } from "../components/IntegrityCheck";
 import { Pager } from "../components/Pager";
 
 type Tab = "consents" | "audit";
@@ -107,12 +108,17 @@ export function DpoConsolePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">DPO console &middot; read-only</p>
-      <h1 className="mt-1 text-3xl font-bold text-brand-900">Consent records and audit trail</h1>
-      <p className="mt-2 max-w-3xl text-slate-600">
-        Every consent decision and every security-relevant action, exactly as stored. Records are append-only and
-        hash-chained, so nothing here can be edited or deleted.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">DPO console &middot; read-only</p>
+          <h1 className="mt-1 text-3xl font-bold text-brand-900">Consent records and audit trail</h1>
+          <p className="mt-2 max-w-3xl text-slate-600">
+            Every consent decision and every security-relevant action, exactly as stored. Records are append-only and
+            hash-chained, so nothing here can be edited or deleted.
+          </p>
+        </div>
+        <IntegrityCheck />
+      </div>
 
       <div role="tablist" aria-label="DPO views" className="mt-6 inline-flex gap-1 rounded-xl border border-slate-200 bg-white p-1">
         {tabBtn("consents", "Consent records")}

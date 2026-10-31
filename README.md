@@ -121,6 +121,7 @@ Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Impleme
 | POST | `/me/consents` | USER | `{purposeId, action: "GRANTED" \| "WITHDRAWN"}` records a new, hash-chained consent decision |
 | GET | `/consents` | DPO, ADMIN | all consent records, newest first, paged; filters `user`, `purpose`, `action`, `policyVersion`, `from`, `to` |
 | GET | `/audit` | DPO, ADMIN | the audit trail, newest first, paged; filters `actor`, `action`, `outcome`, `from`, `to` |
+| GET | `/audit/verify` | DPO, ADMIN | recomputes both SHA-256 hash chains and reports the first broken record |
 
 Security rules: passwords are stored only as bcrypt hashes; 5 wrong passwords in a row lock the account for
 15 minutes (`423 ACCOUNT_LOCKED`); a session expires after 15 minutes without activity; every protected route
