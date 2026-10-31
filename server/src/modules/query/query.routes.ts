@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler";
 import { authorize } from "../../middleware/requireRole";
-import { pageQuerySchema } from "./query.schemas";
+import { auditFilterSchema, consentFilterSchema } from "./query.schemas";
 import * as query from "./query.service";
 
 /**
@@ -11,20 +11,28 @@ import * as query from "./query.service";
 export const consentRecordsRouter = Router();
 export const auditRouter = Router();
 
-/** GET /api/v1/consents?page=1&pageSize=50 -> {items, total, page, pageSize} */
+/**
+ * GET /api/v1/consents -> {items, total, page, pageSize}
+ * Filters (FR-19, all optional): user, purpose, action, policyVersion, from, to, page, pageSize
+ */
 consentRecordsRouter.get(
   "/",
   authorize("DPO", "ADMIN"),
   asyncHandler(async (req, res) => {
-    res.json(await query.listConsentRecords(pageQuerySchema.parse(req.query)));
+    const { page, pageSize, ...filters } = consentFilterSchema.parse(req.query);
+    res.json(await query.listConsentRecords({ page, pageSize }, query.consentWhere(filters)));
   }),
 );
 
-/** GET /api/v1/audit?page=1&pageSize=50 -> {items, total, page, pageSize} */
+/**
+ * GET /api/v1/audit -> {items, total, page, pageSize}
+ * Filters (FR-19, all optional): actor, action, outcome, from, to, page, pageSize
+ */
 auditRouter.get(
   "/",
   authorize("DPO", "ADMIN"),
   asyncHandler(async (req, res) => {
-    res.json(await query.listAuditEntries(pageQuerySchema.parse(req.query)));
+    const { page, pageSize, ...filters } = auditFilterSchema.parse(req.query);
+    res.json(await query.listAuditEntries({ page, pageSize }, query.auditWhere(filters)));
   }),
 );

@@ -87,7 +87,7 @@ describe("admin policy editor (FR-13, FR-14, FR-15)", () => {
     api.createDraft.mockResolvedValue(draft);
     renderAt("/admin");
 
-    expect(await screen.findByText("v1.0")).toBeInTheDocument();
+    await screen.findByText("v1.0"); // wait until the list has loaded
     fireEvent.click(screen.getByRole("button", { name: "New draft" }));
     expect(screen.getByLabelText("Version")).toHaveValue("2.0");
     fireEvent.change(screen.getByLabelText("What changed"), { target: { value: "Adds analytics" } });
@@ -132,7 +132,9 @@ describe("admin policy editor (FR-13, FR-14, FR-15)", () => {
       }),
     );
     renderAt("/admin");
-    fireEvent.click(await screen.findByRole("button", { name: "New draft" }));
+    const newDraft = await screen.findByRole("button", { name: "New draft" });
+    await waitFor(() => expect(newDraft).toBeEnabled());
+    fireEvent.click(newDraft);
     fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
     expect(await screen.findByText("Policy text is required")).toBeInTheDocument();
   });
