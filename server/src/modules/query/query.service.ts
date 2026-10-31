@@ -1,6 +1,6 @@
 import type { ConsentAction, AuditOutcome, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
-import type { PageQuery } from "./query.schemas";
+import type { AuditFilter, ConsentFilter, PageQuery } from "./query.schemas";
 
 /**
  * Read-only views for the DPO / auditor (FR-18). Nothing here changes data.
@@ -102,4 +102,39 @@ export async function listAuditEntries(
       hash: r.hash,
     })),
   };
+}
+
+/** FR-19: turns the consent filters into a database query (all parameterised by Prisma). */
+export function consentWhere(f: Omit<ConsentFilter, "page" | "pageSize">): Prisma.ConsentRecordWhereInput {
+  const where: Prisma.ConsentRecordWhereInput = {};
+  if (f.user) {
+    where.user = {
+      OR: [
+        { email: { contains: f.user, mode: "insensitive" } },
+        { name: { contains: f.user, mode: "insensitive" } },
+      ],
+    };
+  }
+  if (f.purpose) where.purpose = { code: { equals: f.purpose, mode: "insensitive" } };
+  if (f.action) where.action = f.action;
+  if (f.policyVersion) where.policyVersion = { versionNo: f.policyVersion };
+  if (f.from || f.to) where.recordedAt = { ...(f.from && { gte: f.from }), ...(f.to && { lt: f.to }) };
+  return where;
+}
+
+/** FR-19: turns the audit filters into a database query. */
+export function auditWhere(f: Omit<AuditFilter, "page" | "pageSize">): Prisma.AuditEntryWhereInput {
+  const where: Prisma.AuditEntryWhereInput = {};
+  if (f.actor) {
+    where.actor = {
+      OR: [
+        { email: { contains: f.actor, mode: "insensitive" } },
+        { name: { contains: f.actor, mode: "insensitive" } },
+      ],
+    };
+  }
+  if (f.action) where.action = { equals: f.action, mode: "insensitive" };
+  if (f.outcome) where.outcome = f.outcome;
+  if (f.from || f.to) where.createdAt = { ...(f.from && { gte: f.from }), ...(f.to && { lt: f.to }) };
+  return where;
 }

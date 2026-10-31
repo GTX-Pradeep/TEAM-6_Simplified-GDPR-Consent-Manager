@@ -1,10 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { describeError } from "../api/auth";
 import { listAuditEntries, listConsentRecords, type AuditRow, type ConsentRecordRow, type Page } from "../api/dpo";
 import { FormAlert } from "../components/AuthCard";
 import { Pager } from "../components/Pager";
 
 type Tab = "consents" | "audit";
+
+/** FR-19 search fields. Empty fields are not sent. */
+export type Filters = Record<string, string>;
+const emptyFilters: Record<Tab, Filters> = {
+  consents: { user: "", purpose: "", action: "", policyVersion: "", from: "", to: "" },
+  audit: { actor: "", action: "", outcome: "", from: "", to: "" },
+};
+
+/** Drops empty values so the URL only carries real filters. */
+export function activeFilters(f: Filters): Filters {
+  return Object.fromEntries(Object.entries(f).filter(([, v]) => v.trim() !== ""));
+}
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium" });
 
@@ -30,16 +42,19 @@ export function DpoConsolePage() {
   const [consents, setConsents] = useState<Page<ConsentRecordRow> | null>(null);
   const [audit, setAudit] = useState<Page<AuditRow> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<Tab, Filters>>(emptyFilters);
+  const [applied, setApplied] = useState<Record<Tab, Filters>>(emptyFilters);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      if (tab === "consents") setConsents(await listConsentRecords({ page, pageSize: 50 }));
-      else setAudit(await listAuditEntries({ page, pageSize: 50 }));
+      const params = { page, pageSize: 50, ...activeFilters(applied[tab]) };
+      if (tab === "consents") setConsents(await listConsentRecords(params));
+      else setAudit(await listAuditEntries(params));
     } catch (err) {
       setError(describeError(err).message);
     }
-  }, [tab, page]);
+  }, [tab, page, applied]);
 
   useEffect(() => {
     void load();
@@ -65,6 +80,30 @@ export function DpoConsolePage() {
   );
 
   const data = tab === "consents" ? consents : audit;
+  const f = draft[tab];
+  const setField = (k: string) => (e: { target: { value: string } }) =>
+    setDraft({ ...draft, [tab]: { ...draft[tab], [k]: e.target.value } });
+
+  function search(e: FormEvent) {
+    e.preventDefault();
+    setApplied({ ...applied, [tab]: draft[tab] });
+    setPage(1);
+  }
+
+  function clear() {
+    setDraft({ ...draft, [tab]: emptyFilters[tab] });
+    setApplied({ ...applied, [tab]: emptyFilters[tab] });
+    setPage(1);
+  }
+
+  const filtering = Object.keys(activeFilters(applied[tab])).length > 0;
+  const input = "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100";
+  const field = (label: string, el: JSX.Element) => (
+    <label className="block text-xs font-medium text-slate-600">
+      {label}
+      {el}
+    </label>
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -79,6 +118,52 @@ export function DpoConsolePage() {
         {tabBtn("consents", "Consent records")}
         {tabBtn("audit", "Audit trail")}
       </div>
+
+      <form
+        onSubmit={search}
+        aria-label={tab === "consents" ? "Search consent records" : "Search audit trail"}
+        className="card mt-4 grid gap-3 p-4 sm:grid-cols-3 lg:grid-cols-7"
+      >
+        {tab === "consents" ? (
+          <>
+            {field("User (name or e-mail)", <input className={input} value={f.user} onChange={setField("user")} />)}
+            {field("Purpose code", <input className={input} value={f.purpose} onChange={setField("purpose")} placeholder="ANALYTICS" />)}
+            {field("Decision",
+              <select className={input} value={f.action} onChange={setField("action")}>
+                <option value="">Any</option>
+                <option value="GRANTED">Granted</option>
+                <option value="WITHDRAWN">Withdrawn</option>
+              </select>,
+            )}
+            {field("Policy version", <input className={input} value={f.policyVersion} onChange={setField("policyVersion")} placeholder="2.0" />)}
+          </>
+        ) : (
+          <>
+            {field("Actor (name or e-mail)", <input className={input} value={f.actor} onChange={setField("actor")} />)}
+            {field("Action", <input className={input} value={f.action} onChange={setField("action")} placeholder="LOGIN_FAILED" />)}
+            {field("Outcome",
+              <select className={input} value={f.outcome} onChange={setField("outcome")}>
+                <option value="">Any</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILURE">Failure</option>
+              </select>,
+            )}
+            <span className="hidden lg:block" />
+          </>
+        )}
+        {field("From", <input type="date" className={input} value={f.from} onChange={setField("from")} />)}
+        {field("To", <input type="date" className={input} value={f.to} onChange={setField("to")} />)}
+        <div className="flex items-end gap-2">
+          <button type="submit" className="btn-primary px-3 py-1.5">
+            Search
+          </button>
+          {filtering && (
+            <button type="button" className="btn-secondary px-3 py-1.5" onClick={clear}>
+              Clear
+            </button>
+          )}
+        </div>
+      </form>
 
       {error && (
         <div className="mt-4">
@@ -158,7 +243,9 @@ export function DpoConsolePage() {
             </tbody>
           </table>
         )}
-        {data && data.items.length === 0 && <p className="px-4 py-6 text-slate-500">Nothing recorded yet.</p>}
+        {data && data.items.length === 0 && (
+          <p className="px-4 py-6 text-slate-500">{filtering ? "No results match these filters." : "Nothing recorded yet."}</p>
+        )}
         {!data && !error && <p className="px-4 py-6 text-slate-500">Loading...</p>}
         {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={setPage} />}
       </div>

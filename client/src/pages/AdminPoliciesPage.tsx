@@ -109,7 +109,7 @@ export function AdminPoliciesPage() {
           </p>
         </div>
         {!editing && (
-          <button type="button" className="btn-primary" onClick={startNew}>
+          <button type="button" className="btn-primary" onClick={startNew} disabled={policies === null}>
             New draft
           </button>
         )}

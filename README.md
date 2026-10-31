@@ -117,11 +117,16 @@ Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Impleme
 | PATCH | `/policies/:id` | ADMIN | edit a draft (published versions are locked) |
 | POST | `/policies/:id/publish` | ADMIN | publish a draft; the previous version becomes SUPERSEDED |
 | GET | `/me/consents` | USER | my current choice for every active purpose + the current policy version |
+| GET | `/me/consents/history` | USER | every decision I made, newest first (`?limit=` up to 500) |
 | POST | `/me/consents` | USER | `{purposeId, action: "GRANTED" \| "WITHDRAWN"}` records a new, hash-chained consent decision |
+| GET | `/consents` | DPO, ADMIN | all consent records, newest first, paged; filters `user`, `purpose`, `action`, `policyVersion`, `from`, `to` |
+| GET | `/audit` | DPO, ADMIN | the audit trail, newest first, paged; filters `actor`, `action`, `outcome`, `from`, `to` |
 
 Security rules: passwords are stored only as bcrypt hashes; 5 wrong passwords in a row lock the account for
 15 minutes (`423 ACCOUNT_LOCKED`); a session expires after 15 minutes without activity; every protected route
-checks the role on the server (`403 FORBIDDEN` otherwise) and a USER can only reach his or her own data.
+checks the role on the server (`403 FORBIDDEN` otherwise) and a USER can only reach his or her own data. State-changing
+requests from other websites are blocked (`403 CSRF_REJECTED`), login/register are rate-limited per IP
+(`429 RATE_LIMITED`), and in production plain HTTP is redirected to HTTPS.
 
 Errors always look like `{"error": {"code": "EMAIL_TAKEN", "message": "...", "requestId": "..."}}`.
 

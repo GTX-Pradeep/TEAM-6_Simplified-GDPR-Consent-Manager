@@ -84,9 +84,10 @@ describe("DPO console (#22)", () => {
   it("switches to the audit trail tab", async () => {
     renderDpo();
     fireEvent.click(await screen.findByRole("tab", { name: "Audit trail" }));
-    expect(await screen.findByText("LOGIN_FAILED")).toBeInTheDocument();
-    expect(screen.getByText("Anonymous")).toBeInTheDocument();
-    expect(screen.getByText("Failure")).toBeInTheDocument();
+    const cell = await screen.findByRole("cell", { name: "LOGIN_FAILED" });
+    const row = cell.closest("tr") as HTMLElement;
+    expect(within(row).getByText("Anonymous")).toBeInTheDocument();
+    expect(within(row).getByText("Failure")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Audit trail" })).toHaveAttribute("aria-selected", "true");
   });
 
@@ -101,5 +102,59 @@ describe("DPO console (#22)", () => {
     renderDpo();
     await waitFor(() => expect(screen.queryByRole("heading", { name: /consent records and audit trail/i })).toBeNull());
     expect(api.listConsentRecords).not.toHaveBeenCalled();
+  });
+});
+
+describe("search and filter (#26, FR-19)", () => {
+  it("sends only the filled-in consent filters and starts again at page 1", async () => {
+    renderDpo();
+    await screen.findAllByText("user@demo.com");
+    const form = screen.getByRole("form", { name: /search consent records/i });
+    fireEvent.change(within(form).getByLabelText(/user/i), { target: { value: "asha" } });
+    fireEvent.change(within(form).getByLabelText(/decision/i), { target: { value: "WITHDRAWN" } });
+    fireEvent.change(within(form).getByLabelText(/from/i), { target: { value: "2026-10-01" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Search" }));
+
+    await waitFor(() =>
+      expect(api.listConsentRecords).toHaveBeenLastCalledWith({
+        page: 1,
+        pageSize: 50,
+        user: "asha",
+        action: "WITHDRAWN",
+        from: "2026-10-01",
+      }),
+    );
+  });
+
+  it("Clear removes the filters", async () => {
+    renderDpo();
+    await screen.findAllByText("user@demo.com");
+    const form = screen.getByRole("form", { name: /search consent records/i });
+    fireEvent.change(within(form).getByLabelText(/policy version/i), { target: { value: "2.0" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Search" }));
+    fireEvent.click(await within(form).findByRole("button", { name: "Clear" }));
+    await waitFor(() => expect(api.listConsentRecords).toHaveBeenLastCalledWith({ page: 1, pageSize: 50 }));
+  });
+
+  it("the audit tab has its own filters", async () => {
+    renderDpo();
+    fireEvent.click(await screen.findByRole("tab", { name: "Audit trail" }));
+    const form = await screen.findByRole("form", { name: /search audit trail/i });
+    fireEvent.change(within(form).getByLabelText(/outcome/i), { target: { value: "FAILURE" } });
+    fireEvent.change(within(form).getByLabelText(/^action/i), { target: { value: "LOGIN_FAILED" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Search" }));
+    await waitFor(() =>
+      expect(api.listAuditEntries).toHaveBeenLastCalledWith({ page: 1, pageSize: 50, outcome: "FAILURE", action: "LOGIN_FAILED" }),
+    );
+  });
+
+  it("says when nothing matches", async () => {
+    renderDpo();
+    await screen.findAllByText("user@demo.com");
+    api.listConsentRecords.mockResolvedValueOnce({ items: [], total: 0, page: 1, pageSize: 50 });
+    const form = screen.getByRole("form", { name: /search consent records/i });
+    fireEvent.change(within(form).getByLabelText(/user/i), { target: { value: "nobody" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Search" }));
+    expect(await screen.findByText(/no results match these filters/i)).toBeInTheDocument();
   });
 });
