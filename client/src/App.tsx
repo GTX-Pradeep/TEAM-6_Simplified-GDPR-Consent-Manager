@@ -1,8 +1,10 @@
+
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import { AdminPoliciesPage } from "./pages/AdminPoliciesPage";
+import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DpoConsolePage } from "./pages/DpoConsolePage";
 import HistoryPage from "./pages/HistoryPage";
@@ -21,6 +23,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
           <Route
             path="/dashboard"
             element={
@@ -29,6 +32,7 @@ export default function App() {
               </RequireAuth>
             }
           />
+
           <Route
             path="/history"
             element={
@@ -37,6 +41,7 @@ export default function App() {
               </RequireAuth>
             }
           />
+
           <Route
             path="/admin"
             element={
@@ -45,6 +50,16 @@ export default function App() {
               </RequireAuth>
             }
           />
+
+          <Route
+            path="/admin/users"
+            element={
+              <RequireAuth roles={["ADMIN"]}>
+                <AdminUsersPage />
+              </RequireAuth>
+            }
+          />
+
           <Route
             path="/policy"
             element={
@@ -53,6 +68,7 @@ export default function App() {
               </RequireAuth>
             }
           />
+
           <Route
             path="/dpo"
             element={
@@ -61,10 +77,10 @@ export default function App() {
               </RequireAuth>
             }
           />
+
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
     </AuthProvider>
   );
 }
-

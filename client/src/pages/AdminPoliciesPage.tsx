@@ -8,6 +8,7 @@ import {
   type Policy,
   type PolicyInput,
 } from "../api/policies";
+import { AdminNav } from "../components/AdminNav";
 import { FormAlert } from "../components/AuthCard";
 import { FormField } from "../components/FormField";
 import { PolicyStatusBadge } from "../components/PolicyStatusBadge";
@@ -99,6 +100,7 @@ export function AdminPoliciesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <AdminNav />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">Admin console</p>
