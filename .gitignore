@@ -12,6 +12,9 @@ coverage/
 .env.*
 !.env.example
 
+# database backups (contain personal data - never commit)
+server/backups/
+
 # logs
 # cookie file used when testing the API with curl
 cookies.txt
