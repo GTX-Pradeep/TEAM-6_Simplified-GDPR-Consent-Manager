@@ -26,3 +26,18 @@ export const consentStateQuerySchema = z.object({
       return d;
     }),
 });
+
+/** SEC-4: admin user list with optional search and role filter. */
+export const listUsersQuerySchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  role: z.enum(["USER", "ADMIN", "DPO"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export const changeRoleSchema = z.object({ role: z.enum(["USER", "ADMIN", "DPO"]) });

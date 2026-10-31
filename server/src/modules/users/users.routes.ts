@@ -2,8 +2,15 @@ import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler";
 import { authorize } from "../../middleware/requireRole";
 import { recordAuditSafely } from "../audit/audit.service";
+import { changeRole, listUsers, setActive } from "./admin.service";
 import { consentStateAt, findUserByEmail } from "./timeTravel.service";
-import { consentStateQuerySchema, lookupQuerySchema, userIdParamSchema } from "./users.schemas";
+import {
+  changeRoleSchema,
+  consentStateQuerySchema,
+  listUsersQuerySchema,
+  lookupQuerySchema,
+  userIdParamSchema,
+} from "./users.schemas";
 
 export const usersRouter = Router();
 
@@ -37,5 +44,47 @@ usersRouter.get(
       details: { at: at.toISOString() },
     });
     res.json(state);
+  }),
+);
+
+/* ---------------- SEC-4: user administration (ADMIN only) ---------------- */
+
+/** GET /api/v1/users?q=&role=&page=&pageSize= -> {items, total, page, pageSize} */
+usersRouter.get(
+  "/",
+  authorize("ADMIN"),
+  asyncHandler(async (req, res) => {
+    res.json(await listUsers(listUsersQuerySchema.parse(req.query)));
+  }),
+);
+
+/** PATCH /api/v1/users/:userId/role {role} -> {user} */
+usersRouter.patch(
+  "/:userId/role",
+  authorize("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const { userId } = userIdParamSchema.parse(req.params);
+    const { role } = changeRoleSchema.parse(req.body);
+    res.json({ user: await changeRole(req.user!.id, userId, role) });
+  }),
+);
+
+/** PATCH /api/v1/users/:userId/deactivate -> {user} */
+usersRouter.patch(
+  "/:userId/deactivate",
+  authorize("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const { userId } = userIdParamSchema.parse(req.params);
+    res.json({ user: await setActive(req.user!.id, userId, false) });
+  }),
+);
+
+/** PATCH /api/v1/users/:userId/activate -> {user} */
+usersRouter.patch(
+  "/:userId/activate",
+  authorize("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const { userId } = userIdParamSchema.parse(req.params);
+    res.json({ user: await setActive(req.user!.id, userId, true) });
   }),
 );
