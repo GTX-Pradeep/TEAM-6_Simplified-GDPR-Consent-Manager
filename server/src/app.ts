@@ -11,6 +11,7 @@ import { apiRateLimit, authRateLimit, csrfOriginCheck, requireHttps } from "./mi
 import { authRouter } from "./modules/auth/auth.routes";
 import { consentsRouter } from "./modules/consents/consents.routes";
 import { policiesRouter } from "./modules/policies/policies.routes";
+import { noticesRouter } from "./modules/notices/notices.routes";
 import { purposesRouter } from "./modules/purposes/purposes.routes";
 import { auditRouter, consentRecordsRouter } from "./modules/query/query.routes";
 import { usersRouter } from "./modules/users/users.routes";
@@ -61,6 +62,7 @@ export function createApp() {
   api.use("/purposes", purposesRouter); //  FR-4, FR-6
   api.use("/policies", policiesRouter); //  FR-5, FR-13..16
   api.use("/me/consents", consentsRouter); // FR-4, FR-7..11
+  api.use("/me/notices", noticesRouter); //     FR-16
   api.use("/consents", consentRecordsRouter); // FR-18 (DPO, read-only)
   api.use("/audit", auditRouter); //            FR-17, FR-18 (DPO, read-only)
   api.use("/users", usersRouter); //            FR-20 time travel
