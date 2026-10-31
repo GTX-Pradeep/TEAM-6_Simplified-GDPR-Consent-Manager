@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler";
 import { authorize } from "../../middleware/requireRole";
+import { recordAuditSafely } from "../audit/audit.service";
+import { verifyIntegrity } from "../audit/integrity.service";
 import { auditFilterSchema, consentFilterSchema } from "./query.schemas";
 import * as query from "./query.service";
 
@@ -34,5 +36,31 @@ auditRouter.get(
   asyncHandler(async (req, res) => {
     const { page, pageSize, ...filters } = auditFilterSchema.parse(req.query);
     res.json(await query.listAuditEntries({ page, pageSize }, query.auditWhere(filters)));
+  }),
+);
+
+/**
+ * GET /api/v1/audit/verify -> {ok, checkedAt, audit: ChainReport, consents: ChainReport}
+ * SEC-6: recomputes both hash chains and reports the first broken link, if any.
+ */
+auditRouter.get(
+  "/verify",
+  authorize("DPO", "ADMIN"),
+  asyncHandler(async (req, res) => {
+    const report = await verifyIntegrity();
+    // Logged after the check, so the check itself never changes what it is checking.
+    await recordAuditSafely({
+      actorId: req.user!.id,
+      action: "INTEGRITY_CHECKED",
+      targetType: "HashChains",
+      targetId: "audit+consents",
+      outcome: report.ok ? "SUCCESS" : "FAILURE",
+      details: {
+        auditChecked: report.audit.checked,
+        consentsChecked: report.consents.checked,
+        firstBroken: report.audit.firstBrokenId ?? report.consents.firstBrokenId,
+      },
+    });
+    res.json(report);
   }),
 );

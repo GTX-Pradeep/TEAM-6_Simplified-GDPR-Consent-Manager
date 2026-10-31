@@ -43,3 +43,23 @@ export async function listAuditEntries(params: PageParams = {}): Promise<Page<Au
   const { data } = await api.get<Page<AuditRow>>("/audit", { params });
   return data;
 }
+
+export interface ChainReport {
+  ok: boolean;
+  checked: number;
+  firstBrokenId: string | null;
+  reason: "HASH_MISMATCH" | "BROKEN_LINK" | null;
+}
+
+export interface IntegrityReport {
+  ok: boolean;
+  checkedAt: string;
+  audit: ChainReport;
+  consents: ChainReport;
+}
+
+/** GET /audit/verify - recomputes both SHA-256 hash chains (SEC-6). */
+export async function verifyIntegrity(): Promise<IntegrityReport> {
+  const { data } = await api.get<IntegrityReport>("/audit/verify");
+  return data;
+}

@@ -12,7 +12,7 @@ vi.mock("../api/client", () => ({
   getHealth: vi.fn().mockResolvedValue({ status: "ok", db: "up", time: new Date().toISOString() }),
 }));
 vi.mock("../api/auth", async (orig) => ({ ...(await orig<typeof import("../api/auth")>()), me: vi.fn() }));
-vi.mock("../api/dpo", () => ({ listConsentRecords: vi.fn(), listAuditEntries: vi.fn() }));
+vi.mock("../api/dpo", () => ({ listConsentRecords: vi.fn(), listAuditEntries: vi.fn(), verifyIntegrity: vi.fn() }));
 
 const auth = vi.mocked(authApi);
 const api = vi.mocked(dpoApi);
@@ -156,5 +156,34 @@ describe("search and filter (#26, FR-19)", () => {
     fireEvent.change(within(form).getByLabelText(/user/i), { target: { value: "nobody" } });
     fireEvent.click(within(form).getByRole("button", { name: "Search" }));
     expect(await screen.findByText(/no results match these filters/i)).toBeInTheDocument();
+  });
+});
+
+describe("Verify integrity (#27, SEC-6)", () => {
+  it("shows a green result when both chains are intact", async () => {
+    api.verifyIntegrity.mockResolvedValue({
+      ok: true,
+      checkedAt: "2026-10-31T10:00:00.000Z",
+      audit: { ok: true, checked: 312, firstBrokenId: null, reason: null },
+      consents: { ok: true, checked: 148, firstBrokenId: null, reason: null },
+    });
+    renderDpo();
+    fireEvent.click(await screen.findByRole("button", { name: "Verify integrity" }));
+    expect(await screen.findByText(/no tampering found/i)).toBeInTheDocument();
+    expect(screen.getByText("Audit trail: 312 checked, chain intact")).toBeInTheDocument();
+    expect(screen.getByText("Consent records: 148 checked, chain intact")).toBeInTheDocument();
+  });
+
+  it("points to the first broken record when something was changed", async () => {
+    api.verifyIntegrity.mockResolvedValue({
+      ok: false,
+      checkedAt: "2026-10-31T10:00:00.000Z",
+      audit: { ok: false, checked: 57, firstBrokenId: "57", reason: "HASH_MISMATCH" },
+      consents: { ok: true, checked: 148, firstBrokenId: null, reason: null },
+    });
+    renderDpo();
+    fireEvent.click(await screen.findByRole("button", { name: "Verify integrity" }));
+    expect(await screen.findByText("Tampering detected")).toBeInTheDocument();
+    expect(screen.getByText(/problem at #57 - its content does not match its hash/i)).toBeInTheDocument();
   });
 });
