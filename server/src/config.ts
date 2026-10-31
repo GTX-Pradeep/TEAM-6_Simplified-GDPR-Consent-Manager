@@ -14,6 +14,8 @@ const schema = z.object({
   AUTH_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(10),
   /** All other API requests allowed per IP per minute. */
   API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(300),
+  /** NFR-8: consent records, policies and audit entries are kept at least this many years. */
+  RETENTION_YEARS: z.coerce.number().int().min(1).max(50).default(3),
   /** bcrypt work factor (SRS SEC-1). Tests use a lower value to stay fast. */
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(12),
 });
