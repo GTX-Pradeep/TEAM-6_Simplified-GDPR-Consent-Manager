@@ -13,6 +13,7 @@ import { consentsRouter } from "./modules/consents/consents.routes";
 import { policiesRouter } from "./modules/policies/policies.routes";
 import { purposesRouter } from "./modules/purposes/purposes.routes";
 import { auditRouter, consentRecordsRouter } from "./modules/query/query.routes";
+import { usersRouter } from "./modules/users/users.routes";
 import { healthRouter } from "./routes/health";
 
 /**
@@ -62,6 +63,7 @@ export function createApp() {
   api.use("/me/consents", consentsRouter); // FR-4, FR-7..11
   api.use("/consents", consentRecordsRouter); // FR-18 (DPO, read-only)
   api.use("/audit", auditRouter); //            FR-17, FR-18 (DPO, read-only)
+  api.use("/users", usersRouter); //            FR-20 time travel
   app.use("/api/v1", api);
 
   app.use(notFound);
