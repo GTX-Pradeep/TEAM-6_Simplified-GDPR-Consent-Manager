@@ -3,15 +3,17 @@ import { describeError } from "../api/auth";
 import { listAuditEntries, listConsentRecords, type AuditRow, type ConsentRecordRow, type Page } from "../api/dpo";
 import { FormAlert } from "../components/AuthCard";
 import { IntegrityCheck } from "../components/IntegrityCheck";
+import { TimeTravel } from "../components/TimeTravel";
 import { Pager } from "../components/Pager";
 
-type Tab = "consents" | "audit";
+type Tab = "consents" | "audit" | "time";
 
 /** FR-19 search fields. Empty fields are not sent. */
 export type Filters = Record<string, string>;
 const emptyFilters: Record<Tab, Filters> = {
   consents: { user: "", purpose: "", action: "", policyVersion: "", from: "", to: "" },
   audit: { actor: "", action: "", outcome: "", from: "", to: "" },
+  time: {},
 };
 
 /** Drops empty values so the URL only carries real filters. */
@@ -51,7 +53,7 @@ export function DpoConsolePage() {
     try {
       const params = { page, pageSize: 50, ...activeFilters(applied[tab]) };
       if (tab === "consents") setConsents(await listConsentRecords(params));
-      else setAudit(await listAuditEntries(params));
+      else if (tab === "audit") setAudit(await listAuditEntries(params));
     } catch (err) {
       setError(describeError(err).message);
     }
@@ -80,7 +82,7 @@ export function DpoConsolePage() {
     </button>
   );
 
-  const data = tab === "consents" ? consents : audit;
+  const data = tab === "consents" ? consents : tab === "audit" ? audit : null;
   const f = draft[tab];
   const setField = (k: string) => (e: { target: { value: string } }) =>
     setDraft({ ...draft, [tab]: { ...draft[tab], [k]: e.target.value } });
@@ -123,8 +125,15 @@ export function DpoConsolePage() {
       <div role="tablist" aria-label="DPO views" className="mt-6 inline-flex gap-1 rounded-xl border border-slate-200 bg-white p-1">
         {tabBtn("consents", "Consent records")}
         {tabBtn("audit", "Audit trail")}
+        {tabBtn("time", "Time travel")}
       </div>
 
+      {tab === "time" ? (
+        <div className="card mt-4 p-0" role="tabpanel">
+          <TimeTravel />
+        </div>
+      ) : (
+      <>
       <form
         onSubmit={search}
         aria-label={tab === "consents" ? "Search consent records" : "Search audit trail"}
@@ -255,6 +264,8 @@ export function DpoConsolePage() {
         {!data && !error && <p className="px-4 py-6 text-slate-500">Loading...</p>}
         {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={setPage} />}
       </div>
+      </>
+      )}
     </div>
   );
 }

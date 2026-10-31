@@ -63,3 +63,32 @@ export async function verifyIntegrity(): Promise<IntegrityReport> {
   const { data } = await api.get<IntegrityReport>("/audit/verify");
   return data;
 }
+
+export interface PurposeStateAt {
+  purpose: { id: string; code: string; name: string; isActive: boolean };
+  status: "GRANTED" | "WITHDRAWN" | "NOT_GIVEN";
+  decidedAt: string | null;
+  recordId: string | null;
+  policyVersion: { id: string; versionNo: string } | null;
+}
+
+export interface ConsentStateAt {
+  user: { id: string; name: string; email: string };
+  at: string;
+  policyInForce: { id: string; versionNo: string; effectiveAt: string | null } | null;
+  purposes: PurposeStateAt[];
+}
+
+/** GET /users/lookup?email= */
+export async function lookupUser(email: string): Promise<{ id: string; name: string; email: string }> {
+  const { data } = await api.get<{ user: { id: string; name: string; email: string } }>("/users/lookup", {
+    params: { email },
+  });
+  return data.user;
+}
+
+/** GET /users/:id/consent-state?at= - FR-20 time travel. */
+export async function getConsentStateAt(userId: string, at: Date): Promise<ConsentStateAt> {
+  const { data } = await api.get<ConsentStateAt>(`/users/${userId}/consent-state`, { params: { at: at.toISOString() } });
+  return data;
+}

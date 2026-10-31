@@ -12,7 +12,13 @@ vi.mock("../api/client", () => ({
   getHealth: vi.fn().mockResolvedValue({ status: "ok", db: "up", time: new Date().toISOString() }),
 }));
 vi.mock("../api/auth", async (orig) => ({ ...(await orig<typeof import("../api/auth")>()), me: vi.fn() }));
-vi.mock("../api/dpo", () => ({ listConsentRecords: vi.fn(), listAuditEntries: vi.fn(), verifyIntegrity: vi.fn() }));
+vi.mock("../api/dpo", () => ({
+  listConsentRecords: vi.fn(),
+  listAuditEntries: vi.fn(),
+  verifyIntegrity: vi.fn(),
+  lookupUser: vi.fn(),
+  getConsentStateAt: vi.fn(),
+}));
 
 const auth = vi.mocked(authApi);
 const api = vi.mocked(dpoApi);
@@ -185,5 +191,62 @@ describe("Verify integrity (#27, SEC-6)", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Verify integrity" }));
     expect(await screen.findByText("Tampering detected")).toBeInTheDocument();
     expect(screen.getByText(/problem at #57 - its content does not match its hash/i)).toBeInTheDocument();
+  });
+});
+
+describe("Time travel (#16, FR-20)", () => {
+  it("looks up the user and shows what they had agreed to at that moment", async () => {
+    api.lookupUser.mockResolvedValue({ id: "u1", name: "Asha User", email: "user@demo.com" });
+    api.getConsentStateAt.mockResolvedValue({
+      user: { id: "u1", name: "Asha User", email: "user@demo.com" },
+      at: "2026-10-15T09:30:00.000Z",
+      policyInForce: { id: "v1", versionNo: "1.0", effectiveAt: "2026-10-01T00:00:00.000Z" },
+      purposes: [
+        {
+          purpose: { id: "p1", code: "MARKETING_EMAIL", name: "Marketing e-mails", isActive: true },
+          status: "GRANTED",
+          decidedAt: "2026-10-10T09:00:00.000Z",
+          recordId: "1",
+          policyVersion: { id: "v1", versionNo: "1.0" },
+        },
+        {
+          purpose: { id: "p2", code: "ANALYTICS", name: "Usage analytics", isActive: false },
+          status: "NOT_GIVEN",
+          decidedAt: null,
+          recordId: null,
+          policyVersion: null,
+        },
+      ],
+    });
+    renderDpo();
+    fireEvent.click(await screen.findByRole("tab", { name: "Time travel" }));
+    const form = await screen.findByRole("form", { name: /consent state at a past moment/i });
+    fireEvent.change(within(form).getByLabelText(/user e-mail/i), { target: { value: "user@demo.com" } });
+    fireEvent.change(within(form).getByLabelText(/date and time/i), { target: { value: "2026-10-15T15:00" } });
+    fireEvent.click(within(form).getByRole("button", { name: /show consent state/i }));
+
+    await waitFor(() => expect(api.lookupUser).toHaveBeenCalledWith("user@demo.com"));
+    const [, at] = api.getConsentStateAt.mock.calls[0];
+    expect(at).toEqual(new Date("2026-10-15T15:00")); // local time, sent as an exact instant
+    const result = await screen.findByRole("region", { name: "Result" });
+    expect(within(result).getByText("v1.0")).toBeInTheDocument();
+    expect(within(result).getByText("Granted")).toBeInTheDocument();
+    expect(within(result).getByText(/deactivated since/i)).toBeInTheDocument();
+    expect(within(result).getByText(/record #1/)).toBeInTheDocument();
+  });
+
+  it("shows the API error for an unknown e-mail", async () => {
+    api.lookupUser.mockRejectedValue(
+      Object.assign(new Error("404"), {
+        isAxiosError: true,
+        response: { status: 404, data: { error: { code: "USER_NOT_FOUND", message: "No user with this e-mail address" } } },
+      }),
+    );
+    renderDpo();
+    fireEvent.click(await screen.findByRole("tab", { name: "Time travel" }));
+    const form = await screen.findByRole("form", { name: /consent state at a past moment/i });
+    fireEvent.change(within(form).getByLabelText(/user e-mail/i), { target: { value: "nobody@demo.com" } });
+    fireEvent.click(within(form).getByRole("button", { name: /show consent state/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No user with this e-mail address");
   });
 });
