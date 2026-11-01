@@ -4,6 +4,7 @@ import { describeError } from "../api/auth";
 import { getMyConsents, setConsent, type MyConsents, type PurposeState } from "../api/consents";
 import { useAuth } from "../auth/AuthContext";
 import { FormAlert } from "../components/AuthCard";
+import { PolicyNoticeBanner } from "../components/PolicyNoticeBanner";
 
 const badge: Record<PurposeState["status"], { label: string; cls: string }> = {
   GRANTED: { label: "Granted", cls: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" },
@@ -84,9 +85,15 @@ export function DashboardPage() {
             ) : (
               <span className="text-amber-700">No privacy policy published yet</span>
             )}
+            <span className="text-slate-300"> &middot; </span>
+            <Link to="/history" className="font-medium text-brand-700 hover:underline">
+              My history
+            </Link>
           </div>
         )}
       </div>
+
+      <PolicyNoticeBanner onChanged={() => void load()} />
 
       <div className="mt-6 space-y-3" aria-live="polite">
         {notice && (

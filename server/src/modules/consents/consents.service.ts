@@ -1,5 +1,4 @@
-
-import type { ConsentAction, ConsentRecord, PolicyVersion, ProcessingPurpose } from "@prisma/client";
+import type { ConsentAction, ConsentRecord, PolicyVersion, Prisma, ProcessingPurpose } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { appendAudit, canonicalJson, GENESIS_HASH, sha256 } from "../audit/audit.service";
@@ -16,15 +15,6 @@ export interface ConsentDto {
   purposeId: string;
   action: ConsentAction;
   recordedAt: Date;
-  policyVersion: { id: string; versionNo: string };
-}
-
-/** One line of the user's consent history (FR-12). */
-export interface HistoryItemDto {
-  id: string;
-  action: ConsentAction;
-  recordedAt: Date;
-  purpose: { id: string; code: string; name: string };
   policyVersion: { id: string; versionNo: string };
 }
 
@@ -54,6 +44,23 @@ export function computeConsentHash(
         recordedAt: r.recordedAt,
       }),
   );
+}
+
+/**
+ * Adds one record to the end of the consent hash chain, inside the caller's transaction.
+ * Used for every new decision (grant, withdraw, re-confirm). Never updates old rows.
+ */
+export async function appendConsentRecord(
+  tx: Prisma.TransactionClient,
+  input: { userId: string; purposeId: string; action: ConsentAction; policyVersionId: string },
+): Promise<ConsentRecord> {
+  // One writer at a time extends the chain, so two records never share a prevHash.
+  // (Advisory locks are re-entrant, so taking it again in the same transaction is fine.)
+  await tx.$executeRawUnsafe(`SELECT pg_advisory_xact_lock(${CONSENT_CHAIN_LOCK})`);
+  const last = await tx.consentRecord.findFirst({ orderBy: { id: "desc" }, select: { hash: true } });
+  const prevHash = last?.hash ?? GENESIS_HASH;
+  const data = { ...input, recordedAt: new Date() }; // stored as timestamptz, i.e. UTC (NFR-13)
+  return tx.consentRecord.create({ data: { ...data, prevHash, hash: computeConsentHash(prevHash, data) } });
 }
 
 /**
@@ -92,17 +99,11 @@ export async function recordConsent(userId: string, input: ConsentActionInput): 
       throw new AppError(409, "CONSENT_UNCHANGED", "There is no consent to withdraw for this purpose");
     }
 
-    const last = await tx.consentRecord.findFirst({ orderBy: { id: "desc" }, select: { hash: true } });
-    const prevHash = last?.hash ?? GENESIS_HASH;
-    const data = {
+    const record = await appendConsentRecord(tx, {
       userId,
       purposeId: purpose.id,
       action: input.action,
       policyVersionId: policy.id,
-      recordedAt: new Date(), // stored as timestamptz, i.e. UTC (NFR-13)
-    };
-    const record = await tx.consentRecord.create({
-      data: { ...data, prevHash, hash: computeConsentHash(prevHash, data) },
     });
 
     await appendAudit(tx, {
@@ -150,13 +151,20 @@ export async function getCurrentState(
   };
 }
 
+/** One line of the user's consent history (FR-12). */
+export interface HistoryItemDto {
+  id: string;
+  action: ConsentAction;
+  recordedAt: Date;
+  purpose: { id: string; code: string; name: string };
+  policyVersion: { id: string; versionNo: string };
+}
+
 /**
- * FR-12: Return the user's consent history, newest first.
+ * FR-12: every consent decision the user ever made, newest first. Because records
+ * are append-only, this is the complete and unchangeable history.
  */
-export async function getHistory(
-  userId: string,
-  limit = 100,
-): Promise<HistoryItemDto[]> {
+export async function getHistory(userId: string, limit = 100): Promise<HistoryItemDto[]> {
   const rows = await prisma.consentRecord.findMany({
     where: { userId },
     orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
@@ -166,7 +174,6 @@ export async function getHistory(
       policyVersion: { select: { id: true, versionNo: true } },
     },
   });
-
   return rows.map((r) => ({
     id: r.id.toString(),
     action: r.action,

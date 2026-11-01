@@ -2,6 +2,7 @@ import { Prisma, type PolicyVersion } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { appendAudit } from "../audit/audit.service";
+import { createNoticesForPublish } from "../notices/notices.service";
 import type { CreatePolicyInput, UpdatePolicyInput } from "./policies.schemas";
 
 /** FR-13: all versions, newest first (admin / DPO screen). */
@@ -81,13 +82,14 @@ export async function publish(id: string, actorId: string): Promise<PolicyVersio
         where: { id },
         data: { status: "PUBLISHED", effectiveAt: new Date() },
       });
-      // TODO(#20): create re-confirmation notices for affected users (FR-16).
+      // FR-16: users whose consents refer to an older version are asked to review them.
+      const usersNotified = await createNoticesForPublish(tx, published.id);
       await appendAudit(tx, {
         actorId,
         action: "POLICY_PUBLISHED",
         targetType: "PolicyVersion",
         targetId: id,
-        details: { versionNo: published.versionNo, supersedes: previous?.versionNo ?? null },
+        details: { versionNo: published.versionNo, supersedes: previous?.versionNo ?? null, usersNotified },
       });
       return published;
     });

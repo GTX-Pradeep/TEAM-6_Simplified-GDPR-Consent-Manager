@@ -28,6 +28,8 @@ jest.mock("../audit/audit.service", () => ({
   recordAuditSafely: jest.fn(async () => undefined),
 }));
 
+jest.mock("../notices/notices.service", () => ({ createNoticesForPublish: jest.fn(async () => 0) }));
+
 jest.mock("../../lib/prisma", () => {
   const match = (p: Policy, where: Partial<Policy>) =>
     Object.entries(where).every(([k, v]) => (p as Record<string, unknown>)[k] === v);
@@ -235,6 +237,6 @@ describe("audit trail (FR-17)", () => {
       "POLICY_PUBLISHED",
     ]);
     expect(calls.every((c) => c.actorId === "admin-1")).toBe(true);
-    expect(calls[4].details).toEqual({ versionNo: "2.0", supersedes: "1.0" });
+    expect(calls[4].details).toEqual({ versionNo: "2.0", supersedes: "1.0", usersNotified: 0 });
   });
 });
