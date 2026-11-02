@@ -147,7 +147,7 @@ describe("search and filter (FR-19, #26)", () => {
     expect(res.status).toBe(200);
     const where = prisma.consentRecord.findMany.mock.calls[0][0].where;
     expect(where).toEqual({
-      user: { OR: [{ email: { contains: "asha", mode: "insensitive" } }, { name: { contains: "asha", mode: "insensitive" } }] },
+      user: { name: { contains: "asha", mode: "insensitive" } },
       purpose: { code: { equals: "analytics", mode: "insensitive" } },
       action: "GRANTED",
       policyVersion: { versionNo: "2.0" },
@@ -172,7 +172,7 @@ describe("search and filter (FR-19, #26)", () => {
     prisma.auditEntry.findMany.mockClear();
     await request(app).get("/api/v1/audit?actor=meera&action=login_failed&outcome=FAILURE&from=2026-10-29").set("Cookie", asDpo);
     expect(prisma.auditEntry.findMany.mock.calls[0][0].where).toEqual({
-      actor: { OR: [{ email: { contains: "meera", mode: "insensitive" } }, { name: { contains: "meera", mode: "insensitive" } }] },
+      actor: { name: { contains: "meera", mode: "insensitive" } },
       action: { equals: "login_failed", mode: "insensitive" },
       outcome: "FAILURE",
       createdAt: { gte: new Date("2026-10-29T00:00:00.000Z") },
@@ -191,6 +191,16 @@ describe("search and filter (FR-19, #26)", () => {
     prisma.consentRecord.findMany.mockClear();
     const res = await request(app).get("/api/v1/consents").query({ user: "x' OR '1'='1" }).set("Cookie", asDpo);
     expect(res.status).toBe(200);
-    expect(prisma.consentRecord.findMany.mock.calls[0][0].where.user.OR[0].email.contains).toBe("x' OR '1'='1");
+    expect(prisma.consentRecord.findMany.mock.calls[0][0].where.user.name.contains).toBe("x' OR '1'='1");
+  });
+
+  it("a full e-mail address is searched through its lookup hash (e-mails are encrypted, NFR-10)", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { emailHash } = require("../../lib/emailCrypto") as typeof import("../../lib/emailCrypto");
+    prisma.consentRecord.findMany.mockClear();
+    await request(app).get("/api/v1/consents?user=User@Demo.com").set("Cookie", asDpo);
+    expect(prisma.consentRecord.findMany.mock.calls[0][0].where.user).toEqual({
+      OR: [{ emailHash: emailHash("user@demo.com") }, { email: "user@demo.com", emailHash: null }],
+    });
   });
 });

@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { decryptEmail } from "../lib/emailCrypto";
 import { prisma } from "../lib/prisma";
 import { SESSION_COOKIE, setSessionCookie, verifySession } from "../lib/session";
 import { AppError } from "./errorHandler";
@@ -19,7 +20,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       throw new AppError(401, "UNAUTHENTICATED", "Your session has ended, please log in again");
     }
 
-    req.user = { id: user.id, name: user.name, email: user.email, role: user.role };
+    req.user = { id: user.id, name: user.name, email: decryptEmail(user.email), role: user.role };
     setSessionCookie(res, { sub: user.id, role: user.role, sv: user.sessionVersion });
     next();
   } catch (err) {

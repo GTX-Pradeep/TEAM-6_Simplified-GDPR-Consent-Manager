@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import type { PrismaClient } from "@prisma/client";
+import { emailHash, protectEmail } from "../lib/emailCrypto";
 
 /**
  * Demo data so the app can be shown right after setup (issue #10).
@@ -76,9 +77,11 @@ export async function seed(prisma: PrismaClient, rounds = 12): Promise<SeedResul
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, rounds);
 
   for (const u of DEMO_USERS) {
-    const existing = await prisma.user.findUnique({ where: { email: u.email } });
+    const existing =
+      (await prisma.user.findUnique({ where: { emailHash: emailHash(u.email) } })) ??
+      (await prisma.user.findFirst({ where: { email: u.email, emailHash: null } }));
     if (!existing) {
-      await prisma.user.create({ data: { ...u, passwordHash } });
+      await prisma.user.create({ data: { ...u, ...protectEmail(u.email), passwordHash } });
       result.usersCreated++;
     }
   }
@@ -94,7 +97,9 @@ export async function seed(prisma: PrismaClient, rounds = 12): Promise<SeedResul
   // Only add policy v1.0 if no policy exists yet, so we never interfere with real policies.
   const anyPolicy = await prisma.policyVersion.findFirst();
   if (!anyPolicy) {
-    const admin = await prisma.user.findUniqueOrThrow({ where: { email: "admin@demo.com" } });
+    const admin =
+      (await prisma.user.findUnique({ where: { emailHash: emailHash("admin@demo.com") } })) ??
+      (await prisma.user.findFirstOrThrow({ where: { email: "admin@demo.com" } }));
     await prisma.policyVersion.create({
       data: { ...DEMO_POLICY, status: "PUBLISHED", effectiveAt: new Date(), createdById: admin.id },
     });

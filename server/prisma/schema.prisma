@@ -36,7 +36,10 @@ enum AuditOutcome {
 model User {
   id               String    @id @default(uuid()) @db.Uuid
   name             String
-  email            String    @unique
+  /// AES-256-GCM encrypted e-mail address (NFR-10); see src/lib/emailCrypto.ts
+  email            String
+  /// HMAC-SHA256 of the address, used to find a user by e-mail without decrypting every row
+  emailHash        String?   @unique @map("email_hash")
   passwordHash     String    @map("password_hash")
   role             Role      @default(USER)
   isActive         Boolean   @default(true) @map("is_active")

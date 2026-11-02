@@ -1,5 +1,7 @@
 import type { ConsentAction } from "@prisma/client";
+import { withPlainEmail } from "../../lib/emailCrypto";
 import { prisma } from "../../lib/prisma";
+import { findByEmail } from "../auth/auth.service";
 import { AppError } from "../../middleware/errorHandler";
 
 /**
@@ -24,12 +26,9 @@ export interface ConsentStateAt {
 }
 
 export async function findUserByEmail(email: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, name: true, email: true, role: true },
-  });
+  const user = await findByEmail(email);
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "No user with this e-mail address");
-  return user;
+  return withPlainEmail({ id: user.id, name: user.name, email: user.email, role: user.role });
 }
 
 export async function consentStateAt(userId: string, at: Date): Promise<ConsentStateAt> {
@@ -56,7 +55,7 @@ export async function consentStateAt(userId: string, at: Date): Promise<ConsentS
 
   const byPurpose = new Map(latest.map((r) => [r.purposeId, r]));
   return {
-    user,
+    user: withPlainEmail(user),
     at,
     policyInForce: policy,
     purposes: purposes.map((p) => {

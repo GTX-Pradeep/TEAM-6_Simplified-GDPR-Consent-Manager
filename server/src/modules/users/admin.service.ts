@@ -1,5 +1,7 @@
 import type { Prisma, Role } from "@prisma/client";
+import { withPlainEmail } from "../../lib/emailCrypto";
 import { prisma } from "../../lib/prisma";
+import { personFilter } from "../query/query.service";
 import { AppError } from "../../middleware/errorHandler";
 import { appendAudit } from "../audit/audit.service";
 
@@ -28,12 +30,7 @@ export async function listUsers(q: {
   pageSize: number;
 }): Promise<{ items: AdminUserRow[]; total: number; page: number; pageSize: number }> {
   const where: Prisma.UserWhereInput = {};
-  if (q.q) {
-    where.OR = [
-      { email: { contains: q.q, mode: "insensitive" } },
-      { name: { contains: q.q, mode: "insensitive" } },
-    ];
-  }
+  if (q.q) Object.assign(where, personFilter(q.q));
   if (q.role) where.role = q.role;
   const [items, total] = await prisma.$transaction([
     prisma.user.findMany({
@@ -45,13 +42,13 @@ export async function listUsers(q: {
     }),
     prisma.user.count({ where }),
   ]);
-  return { items, total, page: q.page, pageSize: q.pageSize };
+  return { items: items.map(withPlainEmail), total, page: q.page, pageSize: q.pageSize };
 }
 
 async function getOrThrow(id: string) {
   const user = await prisma.user.findUnique({ where: { id }, select });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  return user;
+  return withPlainEmail(user);
 }
 
 /** An admin cannot demote or deactivate himself, so the system never loses its last admin by accident. */
@@ -80,7 +77,7 @@ export async function changeRole(actorId: string, userId: string, role: Role): P
       targetId: userId,
       details: { from: before.role, to: role },
     });
-    return user;
+    return withPlainEmail(user);
   });
 }
 
@@ -102,6 +99,6 @@ export async function setActive(actorId: string, userId: string, isActive: boole
       targetType: "User",
       targetId: userId,
     });
-    return user;
+    return withPlainEmail(user);
   });
 }
