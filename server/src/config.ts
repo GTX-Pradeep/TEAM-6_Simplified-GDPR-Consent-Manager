@@ -23,6 +23,11 @@ const schema = z.object({
     .string()
     .optional()
     .refine((v) => !v || Buffer.from(v, "base64").length === 32, "EMAIL_ENCRYPTION_KEY must be 32 bytes in base64"),
+  /**
+   * Folder with the built React app (client/dist). In production the API also serves the
+   * web app, so the whole system runs on one address (issue #18).
+   */
+  CLIENT_DIST_DIR: z.string().optional(),
   /** NFR-8: consent records, policies and audit entries are kept at least this many years. */
   RETENTION_YEARS: z.coerce.number().int().min(1).max(50).default(3),
   /** bcrypt work factor (SRS SEC-1). Tests use a lower value to stay fast. */
