@@ -12,6 +12,7 @@ type Row = {
   role: "USER" | "ADMIN" | "DPO";
   isActive: boolean;
   sessionVersion: number;
+  emailHash: string | null;
   failedLoginCount: number;
   lockedUntil: Date | null;
 };
@@ -27,10 +28,14 @@ jest.mock("../../lib/prisma", () => {
   const prisma: Record<string, unknown> = {
     $queryRaw: jest.fn(),
     user: {
-      findUnique: jest.fn(async ({ where }: { where: { id?: string; email?: string } }) =>
-        users.find((u) => (where.id ? u.id === where.id : u.email === where.email)) ?? null,
+      findUnique: jest.fn(async ({ where }: { where: { id?: string; emailHash?: string } }) =>
+        users.find((u) => (where.id ? u.id === where.id : u.emailHash === where.emailHash)) ?? null,
       ),
-      create: jest.fn(async ({ data }: { data: Pick<Row, "name" | "email" | "passwordHash" | "role"> }) => {
+      // accounts from before e-mail encryption (plain e-mail, no hash)
+      findFirst: jest.fn(async ({ where }: { where: { email: string; emailHash: null } }) =>
+        users.find((u) => u.emailHash === null && u.email === where.email) ?? null,
+      ),
+      create: jest.fn(async ({ data }: { data: Pick<Row, "name" | "email" | "emailHash" | "passwordHash" | "role"> }) => {
         const row: Row = {
           id: `user-${users.length + 1}`,
           isActive: true,
@@ -302,5 +307,49 @@ describe("audit trail (FR-17)", () => {
     expect(logged).not.toContain("nobody@example.com");
     expect(logged).not.toContain("whatever-1");
     expect(logged).toContain("UNKNOWN_EMAIL");
+  });
+});
+
+describe("e-mail encryption at rest (NFR-10, #28)", () => {
+  it("stores the e-mail encrypted with a lookup hash, but returns it in plain text", async () => {
+    const res = await request(app).post("/api/v1/auth/register").send(alice);
+    expect(res.body.user.email).toBe("alice@example.com");
+    expect(users[0].email).toMatch(/^enc:v1:/);
+    expect(users[0].email).not.toContain("alice");
+    expect(users[0].emailHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("logs in with the e-mail in any letter case", async () => {
+    await request(app).post("/api/v1/auth/register").send(alice);
+    const res = await request(app).post("/api/v1/auth/login").send({ email: "ALICE@example.COM", password: alice.password });
+    expect(res.status).toBe(200);
+  });
+
+  it("an old account with a plain e-mail still logs in and is converted on the way", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const bcrypt = require("bcryptjs") as typeof import("bcryptjs");
+    users.push({
+      id: "legacy-1",
+      name: "Old",
+      email: "old@example.com",
+      emailHash: null,
+      passwordHash: bcrypt.hashSync("old-password-1", 4),
+      role: "USER",
+      isActive: true,
+      sessionVersion: 0,
+      failedLoginCount: 0,
+      lockedUntil: null,
+    });
+    const res = await request(app).post("/api/v1/auth/login").send({ email: "old@example.com", password: "old-password-1" });
+    expect(res.status).toBe(200);
+    expect(res.body.user.email).toBe("old@example.com");
+    expect(users[0].email).toMatch(/^enc:v1:/);
+    expect(users[0].emailHash).not.toBeNull();
+  });
+
+  it("the same address cannot be registered twice, whatever the letter case", async () => {
+    await request(app).post("/api/v1/auth/register").send(alice);
+    const res = await request(app).post("/api/v1/auth/register").send({ ...alice, email: "ALICE@EXAMPLE.COM" });
+    expect(res.status).toBe(409);
   });
 });

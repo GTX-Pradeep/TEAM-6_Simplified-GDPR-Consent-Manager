@@ -19,7 +19,9 @@ npm run db:backup -w server
 Writes `server/backups/backup-<UTC time>.json` with every table (users, purposes, policy versions,
 consent records, audit entries, review notices) read in **one transaction**, so the copy is consistent.
 
-- The file contains e-mail addresses and password **hashes**: keep it private.
+- E-mail addresses in the file are **encrypted** (NFR-10) and passwords are only bcrypt **hashes**, but
+  names and consent data are readable: keep the file private. Restoring needs the same
+  `EMAIL_ENCRYPTION_KEY` (or `JWT_SECRET`) as the original database.
 - `server/backups/` is in `.gitignore`, so it is never pushed to GitHub.
 - The script also reports how many consent records are older than the retention period.
 

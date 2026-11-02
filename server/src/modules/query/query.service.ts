@@ -1,4 +1,5 @@
 import type { ConsentAction, AuditOutcome, Prisma } from "@prisma/client";
+import { decryptEmail, emailHash } from "../../lib/emailCrypto";
 import { prisma } from "../../lib/prisma";
 import type { AuditFilter, ConsentFilter, PageQuery } from "./query.schemas";
 
@@ -64,7 +65,7 @@ export async function listConsentRecords(
       id: r.id.toString(),
       action: r.action,
       recordedAt: r.recordedAt,
-      user: r.user,
+      user: { ...r.user, email: decryptEmail(r.user.email) },
       purpose: r.purpose,
       policyVersion: r.policyVersion,
       hash: r.hash,
@@ -92,7 +93,7 @@ export async function listAuditEntries(
     items: rows.map((r) => ({
       id: r.id.toString(),
       createdAt: r.createdAt,
-      actor: r.actor,
+      actor: r.actor ? { ...r.actor, email: decryptEmail(r.actor.email) } : null,
       action: r.action,
       targetType: r.targetType,
       targetId: r.targetId,
@@ -104,17 +105,21 @@ export async function listAuditEntries(
   };
 }
 
+/**
+ * Search text for a person. E-mails are encrypted (NFR-10), so a full e-mail address is
+ * matched exactly through its lookup hash; any other text is matched against the name.
+ */
+export function personFilter(text: string): Prisma.UserWhereInput {
+  if (text.includes("@")) {
+    return { OR: [{ emailHash: emailHash(text) }, { email: text.trim().toLowerCase(), emailHash: null }] };
+  }
+  return { name: { contains: text, mode: "insensitive" } };
+}
+
 /** FR-19: turns the consent filters into a database query (all parameterised by Prisma). */
 export function consentWhere(f: Omit<ConsentFilter, "page" | "pageSize">): Prisma.ConsentRecordWhereInput {
   const where: Prisma.ConsentRecordWhereInput = {};
-  if (f.user) {
-    where.user = {
-      OR: [
-        { email: { contains: f.user, mode: "insensitive" } },
-        { name: { contains: f.user, mode: "insensitive" } },
-      ],
-    };
-  }
+  if (f.user) where.user = personFilter(f.user);
   if (f.purpose) where.purpose = { code: { equals: f.purpose, mode: "insensitive" } };
   if (f.action) where.action = f.action;
   if (f.policyVersion) where.policyVersion = { versionNo: f.policyVersion };
@@ -125,14 +130,7 @@ export function consentWhere(f: Omit<ConsentFilter, "page" | "pageSize">): Prism
 /** FR-19: turns the audit filters into a database query. */
 export function auditWhere(f: Omit<AuditFilter, "page" | "pageSize">): Prisma.AuditEntryWhereInput {
   const where: Prisma.AuditEntryWhereInput = {};
-  if (f.actor) {
-    where.actor = {
-      OR: [
-        { email: { contains: f.actor, mode: "insensitive" } },
-        { name: { contains: f.actor, mode: "insensitive" } },
-      ],
-    };
-  }
+  if (f.actor) where.actor = personFilter(f.actor);
   if (f.action) where.action = { equals: f.action, mode: "insensitive" };
   if (f.outcome) where.outcome = f.outcome;
   if (f.from || f.to) where.createdAt = { ...(f.from && { gte: f.from }), ...(f.to && { lt: f.to }) };

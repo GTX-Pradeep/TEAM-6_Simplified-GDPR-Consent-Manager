@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Prisma, type User } from "@prisma/client";
 import { config } from "../../config";
+import { decryptEmail, emailHash, protectEmail } from "../../lib/emailCrypto";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { appendAudit, recordAuditSafely } from "../audit/audit.service";
@@ -9,12 +10,24 @@ import type { LoginInput, RegisterInput } from "./auth.schemas";
 
 /** The only user fields ever sent to the browser. */
 export function toPublicUser(user: Pick<User, "id" | "name" | "email" | "role">): AuthUser {
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return { id: user.id, name: user.name, email: decryptEmail(user.email), role: user.role };
+}
+
+/**
+ * Finds a user by e-mail through the lookup hash (NFR-10). Accounts created before e-mail
+ * encryption have no hash yet; they are found by their plain address and converted.
+ */
+export async function findByEmail(email: string): Promise<User | null> {
+  const byHash = await prisma.user.findUnique({ where: { emailHash: emailHash(email) } });
+  if (byHash) return byHash;
+  const legacy = await prisma.user.findFirst({ where: { email, emailHash: null } });
+  if (!legacy) return null;
+  return prisma.user.update({ where: { id: legacy.id }, data: protectEmail(email) });
 }
 
 /** FR-1: self-registered accounts always get the USER role. */
 export async function register(input: RegisterInput): Promise<User> {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
+  const existing = await findByEmail(input.email);
   if (existing) throw emailTaken();
 
   const passwordHash = await bcrypt.hash(input.password, config.BCRYPT_ROUNDS);
@@ -22,7 +35,7 @@ export async function register(input: RegisterInput): Promise<User> {
     // The account and its audit entry are saved together (FR-17).
     return await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { name: input.name, email: input.email, passwordHash, role: "USER" },
+        data: { name: input.name, ...protectEmail(input.email), passwordHash, role: "USER" },
       });
       await appendAudit(tx, { actorId: user.id, action: "USER_REGISTERED", targetType: "User", targetId: user.id });
       return user;
@@ -45,7 +58,7 @@ export const LOCK_MINUTES = 15;
 
 /** FR-2 + SEC-3: returns the user if the e-mail and password are correct and the account is not locked. */
 export async function login(input: LoginInput): Promise<User> {
-  const user = await prisma.user.findUnique({ where: { email: input.email } });
+  const user = await findByEmail(input.email);
 
   // A locked account is refused before the password is even checked, so guessing
   // the right password during the lock period does not help.

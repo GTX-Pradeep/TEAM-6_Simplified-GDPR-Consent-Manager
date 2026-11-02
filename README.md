@@ -92,6 +92,7 @@ The seed is safe to run again (it only adds what is missing) and refuses to run 
 | `npm run typecheck` | TypeScript checks for both apps |
 | `npm run build` | production build |
 | `npm run db:seed -w server` | add demo accounts, purposes and policy 1.0 |
+| `npm run db:encrypt-emails -w server` | one-time: encrypt e-mails of accounts created before encryption |
 | `npm run db:studio -w server` | browse the database in Prisma Studio |
 | `npm run db:down` | stop the database container |
 
@@ -119,17 +120,25 @@ Base path `/api/v1`. The full endpoint list is in the SAD (Section 4.3). Impleme
 | GET | `/me/consents` | USER | my current choice for every active purpose + the current policy version |
 | GET | `/me/consents/history` | USER | every decision I made, newest first (`?limit=` up to 500) |
 | POST | `/me/consents` | USER | `{purposeId, action: "GRANTED" \| "WITHDRAWN"}` records a new, hash-chained consent decision |
+| GET | `/me/notices` | USER | open "policy changed" notice with the purposes to review (FR-16) |
+| POST | `/me/notices/:id/reconfirm` | USER | keep my choices: new GRANTED records under the new version |
+| POST | `/me/notices/:id/ack` | USER | close the notice after reviewing |
 | GET | `/consents` | DPO, ADMIN | all consent records, newest first, paged; filters `user`, `purpose`, `action`, `policyVersion`, `from`, `to` |
 | GET | `/audit` | DPO, ADMIN | the audit trail, newest first, paged; filters `actor`, `action`, `outcome`, `from`, `to` |
 | GET | `/audit/verify` | DPO, ADMIN | recomputes both SHA-256 hash chains and reports the first broken record |
 | GET | `/users/lookup?email=` | DPO, ADMIN | find a user by e-mail |
 | GET | `/users/:id/consent-state?at=` | DPO, ADMIN | "time travel": the user's consent per purpose at a past moment + the policy then in force |
+| GET | `/users?q=&role=` | ADMIN | list and search user accounts |
+| PATCH | `/users/:id/role` | ADMIN | `{role}` change a role (audited; the user's sessions end) |
+| PATCH | `/users/:id/deactivate` / `activate` | ADMIN | block or restore an account (audited) |
 
 Security rules: passwords are stored only as bcrypt hashes; 5 wrong passwords in a row lock the account for
 15 minutes (`423 ACCOUNT_LOCKED`); a session expires after 15 minutes without activity; every protected route
 checks the role on the server (`403 FORBIDDEN` otherwise) and a USER can only reach his or her own data. State-changing
 requests from other websites are blocked (`403 CSRF_REJECTED`), login/register are rate-limited per IP
-(`429 RATE_LIMITED`), and in production plain HTTP is redirected to HTTPS.
+(`429 RATE_LIMITED`), and in production plain HTTP is redirected to HTTPS. E-mail addresses are stored
+**encrypted** (AES-256-GCM) with an HMAC lookup hash, so database dumps and backups do not show them, and logs
+never contain passwords, e-mails, tokens or cookies.
 
 Errors always look like `{"error": {"code": "EMAIL_TAKEN", "message": "...", "requestId": "..."}}`.
 

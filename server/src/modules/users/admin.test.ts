@@ -43,12 +43,10 @@ jest.mock("../../lib/prisma", () => {
     lockedUntil: u.lockedUntil,
     createdAt: u.createdAt,
   });
-  const matches = (u: Row, where: { role?: string; OR?: { email?: { contains: string }; name?: { contains: string } }[] }) =>
+  const matches = (u: Row, where: { role?: string; name?: { contains: string }; OR?: { email?: string }[] }) =>
     (!where.role || u.role === where.role) &&
-    (!where.OR ||
-      where.OR.some((c) =>
-        c.email ? u.email.toLowerCase().includes(c.email.contains.toLowerCase()) : u.name.toLowerCase().includes(c.name!.contains.toLowerCase()),
-      ));
+    (!where.name || u.name.toLowerCase().includes(where.name.contains.toLowerCase())) &&
+    (!where.OR || where.OR.some((c) => c.email === u.email));
   const prisma: Record<string, unknown> = {
     user: {
       findUnique: jest.fn(async ({ where, select }: { where: { id: string }; select?: object }) => {
@@ -99,6 +97,7 @@ describe("GET /api/v1/users (SEC-4)", () => {
 
   it("searches by name/e-mail and filters by role", async () => {
     expect((await request(app).get("/api/v1/users?q=asha").set("Cookie", asAdmin)).body.items).toHaveLength(1);
+    expect((await request(app).get("/api/v1/users?q=user@demo.com").set("Cookie", asAdmin)).body.items).toHaveLength(1);
     expect((await request(app).get("/api/v1/users?role=DPO").set("Cookie", asAdmin)).body.items[0].email).toBe("dpo@demo.com");
   });
 

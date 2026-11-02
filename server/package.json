@@ -18,7 +18,8 @@
     "postinstall": "prisma generate",
     "db:seed": "tsx src/scripts/seed.ts",
     "db:backup": "tsx src/scripts/backup.ts",
-    "db:restore": "tsx src/scripts/restore.ts"
+    "db:restore": "tsx src/scripts/restore.ts",
+    "db:encrypt-emails": "tsx src/scripts/encryptEmails.ts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

@@ -10,7 +10,10 @@ process.env.AUTH_RATE_LIMIT_PER_MINUTE = "3";
 process.env.API_RATE_LIMIT_PER_MINUTE = "10000";
 
 jest.mock("../lib/prisma", () => ({
-  prisma: { $queryRaw: jest.fn(async () => [1]), user: { findUnique: jest.fn(async () => null) } },
+  prisma: {
+    $queryRaw: jest.fn(async () => [1]),
+    user: { findUnique: jest.fn(async () => null), findFirst: jest.fn(async () => null) },
+  },
 }));
 jest.mock("../modules/audit/audit.service", () => ({
   appendAudit: jest.fn(async () => undefined),

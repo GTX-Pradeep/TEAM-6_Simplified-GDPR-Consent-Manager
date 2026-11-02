@@ -14,7 +14,12 @@ function fakePrisma() {
       if (!row) throw new Error("not found");
       return row;
     }),
-    findFirst: jest.fn(async () => tables[name][0] ?? null),
+    findFirst: jest.fn(async ({ where }: { where?: AnyRow } = {}) =>
+      where?.email ? (tables[name].find((r) => r.email === where.email && !r.emailHash) ?? null) : (tables[name][0] ?? null),
+    ),
+    findFirstOrThrow: jest.fn(async () => {
+      throw new Error("not found");
+    }),
     create: jest.fn(async ({ data }: { data: AnyRow }) => {
       const row = { id: `${name}-${tables[name].length + 1}`, ...data };
       tables[name].push(row);
@@ -22,7 +27,7 @@ function fakePrisma() {
     }),
   });
   const prisma = {
-    user: model("user", "email"),
+    user: model("user", "emailHash"),
     processingPurpose: model("processingPurpose", "code"),
     policyVersion: model("policyVersion", "id"),
   };
@@ -39,6 +44,7 @@ describe("seed (#10)", () => {
     expect(tables.user.map((u) => u.role)).toEqual(["USER", "ADMIN", "DPO"]);
     expect(tables.processingPurpose).toHaveLength(DEMO_PURPOSES.length);
 
+    expect(tables.user[0].email).toMatch(/^enc:v1:/); // NFR-10
     const hash = tables.user[0].passwordHash as string;
     expect(hash).not.toContain(DEMO_PASSWORD);
     expect(await bcrypt.compare(DEMO_PASSWORD, hash)).toBe(true);

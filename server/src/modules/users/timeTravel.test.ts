@@ -35,9 +35,11 @@ jest.mock("../audit/audit.service", () => ({
 jest.mock("../../lib/prisma", () => ({
   prisma: {
     user: {
-      findUnique: jest.fn(async ({ where }: { where: { id?: string; email?: string } }) =>
-        db.users.find((u) => (where.id ? u.id === where.id : u.email === where.email)) ?? null,
-      ),
+      findUnique: jest.fn(async ({ where }: { where: { id?: string; emailHash?: string } }) => {
+        const { emailHash } = jest.requireActual("../../lib/emailCrypto");
+        return db.users.find((u) => (where.id ? u.id === where.id : emailHash(u.email) === where.emailHash)) ?? null;
+      }),
+      findFirst: jest.fn(async () => null),
     },
     processingPurpose: {
       findMany: jest.fn(async ({ where }: { where: { createdAt: { lte: Date } } }) =>

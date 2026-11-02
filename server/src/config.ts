@@ -14,6 +14,15 @@ const schema = z.object({
   AUTH_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(10),
   /** All other API requests allowed per IP per minute. */
   API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(300),
+  /**
+   * NFR-10: key for encrypting e-mail addresses at rest: 32 random bytes as base64
+   * (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))").
+   * If missing, a key is derived from JWT_SECRET, so keep JWT_SECRET stable in that case.
+   */
+  EMAIL_ENCRYPTION_KEY: z
+    .string()
+    .optional()
+    .refine((v) => !v || Buffer.from(v, "base64").length === 32, "EMAIL_ENCRYPTION_KEY must be 32 bytes in base64"),
   /** NFR-8: consent records, policies and audit entries are kept at least this many years. */
   RETENTION_YEARS: z.coerce.number().int().min(1).max(50).default(3),
   /** bcrypt work factor (SRS SEC-1). Tests use a lower value to stay fast. */
