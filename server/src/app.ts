@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import pinoHttp from "pino-http";
 import { config } from "./config";
 import { logger } from "./lib/logger";
+import { serveClient } from "./lib/staticClient";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { apiRateLimit, authRateLimit, csrfOriginCheck, requireHttps } from "./middleware/security";
 import { authRouter } from "./modules/auth/auth.routes";
@@ -67,6 +68,7 @@ export function createApp() {
   api.use("/audit", auditRouter); //            FR-17, FR-18 (DPO, read-only)
   api.use("/users", usersRouter); //            FR-20 time travel
   app.use("/api/v1", api);
+  serveClient(app); // production only: the web app on the same address (#18)
 
   app.use(notFound);
   app.use(errorHandler);

@@ -6,6 +6,9 @@ A full-stack web application for recording, reviewing and withdrawing user conse
 **versioned privacy policies**, an **append-only, SHA-256 hash-chained audit trail** and **point-in-time ("time travel")
 consent queries** for auditors.
 
+**Live demo:** _add the Render link here after deploying (see [Deployment](docs/05-Operations/Deployment.md))_ ·
+demo logins `user@demo.com`, `admin@demo.com`, `dpo@demo.com` (password `Demo@12345`)
+
 > Academic software-engineering project (Team 6). It demonstrates GDPR-style consent management; it is not a legal
 > compliance certification.
 
@@ -20,6 +23,15 @@ consent queries** for auditors.
 Every consent decision stores the **UTC timestamp** and the **policy version** the user saw. Records are never
 updated or deleted - database triggers reject it - so the history is complete and tamper-evident.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Consent dashboard](docs/screenshots/02-consent-dashboard.png) **User: consent dashboard** | ![Policy change notice](docs/screenshots/03-policy-change-notice.png) **User: re-confirm after a policy change** |
+| ![Consent history](docs/screenshots/04-consent-history.png) **User: consent history** | ![Admin policy versions](docs/screenshots/05-admin-policy-versions.png) **Admin: policy versions** |
+| ![Admin users](docs/screenshots/06-admin-users-roles.png) **Admin: users and roles** | ![DPO console](docs/screenshots/07-dpo-consent-records.png) **DPO: records, search, verify integrity** |
+| ![Time travel](docs/screenshots/08-dpo-time-travel.png) **DPO: consent state at a past moment** | ![Log in](docs/screenshots/01-login.png) **Log in** |
+
 ## Tech stack
 
 | Layer | Technology |
@@ -28,7 +40,7 @@ updated or deleted - database triggers reject it - so the history is complete an
 | Back end | Node.js 20, Express, TypeScript, Zod, Helmet, pino |
 | Database | PostgreSQL 16, Prisma ORM |
 | Testing | Jest + Supertest (API), Vitest + React Testing Library (UI) |
-| DevOps | Docker Compose, GitHub Actions CI |
+| DevOps | GitHub Actions CI, Render (hosting), Neon (PostgreSQL), Docker Compose for local DB |
 
 ## Project structure
 

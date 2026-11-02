@@ -1,0 +1,31 @@
+# Render Blueprint (issue #18): one free web service runs the API and serves the React app.
+# Render dashboard -> New -> Blueprint -> pick this repository. See docs/05-Operations/Deployment.md.
+services:
+  - type: web
+    name: gdpr-consent-manager
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    # --include=dev: TypeScript, Vite and Prisma are needed to build.
+    buildCommand: >-
+      npm ci --include=dev &&
+      npm run build &&
+      npm run db:migrate -w server &&
+      npm run db:seed -w server
+    startCommand: npm start -w server
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: DATABASE_URL
+        sync: false # paste the Neon connection string (connection pooling OFF) when asked
+      - key: JWT_SECRET
+        generateValue: true
+      - key: EMAIL_ENCRYPTION_KEY
+        generateValue: true # 32 random bytes, base64 - never change it after data exists
+      - key: SEED_DEMO
+        value: "true" # create the demo accounts so evaluators can log in
