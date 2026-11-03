@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler";
+import { AppError } from "../../middleware/errorHandler";
 import { requireAuth } from "../../middleware/requireAuth";
 import { authorize } from "../../middleware/requireRole";
 import { createPolicySchema, idParamSchema, updatePolicySchema } from "./policies.schemas";
@@ -25,13 +26,21 @@ policiesRouter.get(
   }),
 );
 
-/** GET /api/v1/policies/:id -> 200 {policy}   any logged-in user */
+/**
+ * GET /api/v1/policies/:id -> 200 {policy}   any logged-in user.
+ * FR-13: drafts are only visible to ADMIN and DPO; for a normal user a draft looks like it
+ * does not exist (404), so unpublished text never leaks. Found during system validation.
+ */
 policiesRouter.get(
   "/:id",
   requireAuth,
   asyncHandler(async (req, res) => {
     const { id } = idParamSchema.parse(req.params);
-    res.json({ policy: await policies.getPolicy(id) });
+    const policy = await policies.getPolicy(id);
+    if (policy.status === "DRAFT" && req.user?.role === "USER") {
+      throw new AppError(404, "POLICY_NOT_FOUND", "Policy version not found");
+    }
+    res.json({ policy });
   }),
 );
 

@@ -8,6 +8,8 @@ import { check, sleep } from "k6";
 import { BASE, login } from "./lib.js";
 
 export const options = {
+  // keep each virtual user's session cookie between iterations (k6 clears the jar by default)
+  noCookiesReset: true,
   vus: Number(__ENV.VUS || 10),
   duration: __ENV.DURATION || "1m",
   thresholds: {

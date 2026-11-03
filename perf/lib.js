@@ -14,6 +14,11 @@ export function login(email, password) {
 
 /** Creates the account if it does not exist yet (409 = already there, also fine). */
 export function ensureUser(name, email, password) {
-  const res = http.post(`${BASE}/auth/register`, JSON.stringify({ name, email, password }), JSON_HEADERS);
+  const res = http.post(
+    `${BASE}/auth/register`,
+    JSON.stringify({ name, email, password }),
+    // 409 means the account is already there from an earlier run: not a failed request
+    Object.assign({ responseCallback: http.expectedStatuses(201, 409) }, JSON_HEADERS),
+  );
   return res.status === 201 || res.status === 409;
 }

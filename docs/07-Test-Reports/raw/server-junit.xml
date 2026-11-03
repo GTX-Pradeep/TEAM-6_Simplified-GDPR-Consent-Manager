@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="172" failures="0" errors="0" time="19.658">
+  <testsuite name="CSRF origin check (SEC-7)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:31:48" time="9" tests="12">
+    <testcase classname="CSRF origin check (SEC-7) blocks a state-changing request coming from another website" name="CSRF origin check (SEC-7) blocks a state-changing request coming from another website" time="0.108" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="CSRF origin check (SEC-7) blocks it when only the Referer shows another site" name="CSRF origin check (SEC-7) blocks it when only the Referer shows another site" time="0.024" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="CSRF origin check (SEC-7) allows requests from our own front end" name="CSRF origin check (SEC-7) allows requests from our own front end" time="0.024" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="CSRF origin check (SEC-7) allows same-host requests (front end served by the API in production)" name="CSRF origin check (SEC-7) allows same-host requests (front end served by the API in production)" time="0.014" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="CSRF origin check (SEC-7) never blocks read-only requests" name="CSRF origin check (SEC-7) never blocks read-only requests" time="0.022" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="CSRF origin check (SEC-7) blocks the opaque &apos;null&apos; origin used by sandboxed attack pages" name="CSRF origin check (SEC-7) blocks the opaque &apos;null&apos; origin used by sandboxed attack pages" time="0.017" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="rate limit on login/register (SEC-7, brute force) returns 429 after the limit is reached" name="rate limit on login/register (SEC-7, brute force) returns 429 after the limit is reached" time="0.442" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="HTTPS redirect (SEC-5) is off outside production" name="HTTPS redirect (SEC-5) is off outside production" time="0.004" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="HTTPS redirect (SEC-5) redirects plain HTTP to HTTPS in production" name="HTTPS redirect (SEC-5) redirects plain HTTP to HTTPS in production" time="0.021" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="other OWASP basics (SEC-7) rejects malformed input before it reaches the database" name="other OWASP basics (SEC-7) rejects malformed input before it reaches the database" time="0.007" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="other OWASP basics (SEC-7) sends a Content-Security-Policy and HSTS header" name="other OWASP basics (SEC-7) sends a Content-Security-Policy and HSTS header" time="0.005" file="src/middleware/security.test.ts">
+    </testcase>
+    <testcase classname="other OWASP basics (SEC-7) a custom origin can be configured" name="other OWASP basics (SEC-7) a custom origin can be configured" time="0.005" file="src/middleware/security.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /api/v1/policies (FR-13)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:31:57" time="0.957" tests="16">
+    <testcase classname="POST /api/v1/policies (FR-13) an ADMIN creates a DRAFT and is recorded as its author" name="POST /api/v1/policies (FR-13) an ADMIN creates a DRAFT and is recorded as its author" time="0.015" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies (FR-13) USER and DPO get 403" name="POST /api/v1/policies (FR-13) USER and DPO get 403" time="0.009" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies (FR-13) a duplicate version number gets 409 POLICY_VERSION_TAKEN" name="POST /api/v1/policies (FR-13) a duplicate version number gets 409 POLICY_VERSION_TAKEN" time="0.008" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies (FR-13) validates the input" name="POST /api/v1/policies (FR-13) validates the input" time="0.005" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/policies/:id (FR-13, FR-15) a draft can be edited" name="PATCH /api/v1/policies/:id (FR-13, FR-15) a draft can be edited" time="0.008" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/policies/:id (FR-13, FR-15) a published version is locked: 409 POLICY_LOCKED and the text is unchanged" name="PATCH /api/v1/policies/:id (FR-13, FR-15) a published version is locked: 409 POLICY_LOCKED and the text is unchanged" time="0.036" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies/:id/publish (FR-14) publishing sets PUBLISHED and the effective date" name="POST /api/v1/policies/:id/publish (FR-14) publishing sets PUBLISHED and the effective date" time="0.009" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies/:id/publish (FR-14) publishing a new version supersedes the old one, so only one is published" name="POST /api/v1/policies/:id/publish (FR-14) publishing a new version supersedes the old one, so only one is published" time="0.014" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies/:id/publish (FR-14) an already published version cannot be published again" name="POST /api/v1/policies/:id/publish (FR-14) an already published version cannot be published again" time="0.012" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/policies/:id/publish (FR-14) a USER cannot publish; an unknown id gets 404" name="POST /api/v1/policies/:id/publish (FR-14) a USER cannot publish; an unknown id gets 404" time="0.009" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="reading policies (FR-5) GET /current returns 404 before anything is published" name="reading policies (FR-5) GET /current returns 404 before anything is published" time="0.003" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="reading policies (FR-5) GET /current returns the published version to any logged-in user" name="reading policies (FR-5) GET /current returns the published version to any logged-in user" time="0.009" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="reading policies (FR-5) GET /policies (all versions) is for ADMIN and DPO only, newest first" name="reading policies (FR-5) GET /policies (all versions) is for ADMIN and DPO only, newest first" time="0.011" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="reading policies (FR-5) GET /:id returns a published version to a logged-in user; needs login" name="reading policies (FR-5) GET /:id returns a published version to a logged-in user; needs login" time="0.011" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="reading policies (FR-5) GET /:id hides a DRAFT from a USER (404) but shows it to ADMIN and DPO (FR-13)" name="reading policies (FR-5) GET /:id hides a DRAFT from a USER (404) but shows it to ADMIN and DPO (FR-13)" time="0.017" file="src/modules/policies/policies.test.ts">
+    </testcase>
+    <testcase classname="audit trail (FR-17) creating, editing and publishing are audited with the admin as actor" name="audit trail (FR-17) creating, editing and publishing are audited with the admin as actor" time="0.018" file="src/modules/policies/policies.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /api/v1/auth/register (FR-1, SEC-1)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:31:58" time="1.233" tests="24">
+    <testcase classname="POST /api/v1/auth/register (FR-1, SEC-1) creates a USER account, logs it in and never returns the password hash" name="POST /api/v1/auth/register (FR-1, SEC-1) creates a USER account, logs it in and never returns the password hash" time="0.036" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/register (FR-1, SEC-1) stores only a bcrypt hash, not the password" name="POST /api/v1/auth/register (FR-1, SEC-1) stores only a bcrypt hash, not the password" time="0.007" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/register (FR-1, SEC-1) ignores a role sent by the client" name="POST /api/v1/auth/register (FR-1, SEC-1) ignores a role sent by the client" time="0.006" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/register (FR-1, SEC-1) rejects a duplicate e-mail (case-insensitive) with 409" name="POST /api/v1/auth/register (FR-1, SEC-1) rejects a duplicate e-mail (case-insensitive) with 409" time="0.008" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/register (FR-1, SEC-1) rejects a short password and a bad e-mail with 400" name="POST /api/v1/auth/register (FR-1, SEC-1) rejects a short password and a bad e-mail with 400" time="0.003" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/login (FR-2) logs in with the right password and returns the role" name="POST /api/v1/auth/login (FR-2) logs in with the right password and returns the role" time="0.01" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/login (FR-2) returns the same 401 for a wrong password" name="POST /api/v1/auth/login (FR-2) returns the same 401 for a wrong password" time="0.01" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/login (FR-2) returns the same 401 for a unknown e-mail" name="POST /api/v1/auth/login (FR-2) returns the same 401 for a unknown e-mail" time="0.089" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/auth/login (FR-2) refuses a deactivated account" name="POST /api/v1/auth/login (FR-2) refuses a deactivated account" time="0.01" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns 401 without a session" name="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns 401 without a session" time="0.003" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns 401 for a forged token" name="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns 401 for a forged token" time="0.003" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns the user with a valid session" name="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) returns the user with a valid session" time="0.008" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) after logout the OLD cookie no longer works, even if someone kept a copy" name="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) after logout the OLD cookie no longer works, even if someone kept a copy" time="0.009" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) logout without a session is harmless" name="GET /api/v1/auth/me and POST /api/v1/auth/logout (FR-3) logout without a session is harmless" time="0.002" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="account lockout (SEC-3) locks the account after 5 wrong passwords; the 6th attempt is refused even with the right password" name="account lockout (SEC-3) locks the account after 5 wrong passwords; the 6th attempt is refused even with the right password" time="0.034" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="account lockout (SEC-3) allows login again once the 15 minutes have passed" name="account lockout (SEC-3) allows login again once the 15 minutes have passed" time="0.034" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="account lockout (SEC-3) a successful login resets the failure counter" name="account lockout (SEC-3) a successful login resets the failure counter" time="0.049" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="session expiry (SEC-3) rejects a token that has expired" name="session expiry (SEC-3) rejects a token that has expired" time="0.009" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="audit trail (FR-17) records registration, successful and failed logins, lockout and logout" name="audit trail (FR-17) records registration, successful and failed logins, lockout and logout" time="0.033" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="audit trail (FR-17) never writes the e-mail address or password into the audit trail (NFR-9)" name="audit trail (FR-17) never writes the e-mail address or password into the audit trail (NFR-9)" time="0.116" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption at rest (NFR-10, #28) stores the e-mail encrypted with a lookup hash, but returns it in plain text" name="e-mail encryption at rest (NFR-10, #28) stores the e-mail encrypted with a lookup hash, but returns it in plain text" time="0.008" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption at rest (NFR-10, #28) logs in with the e-mail in any letter case" name="e-mail encryption at rest (NFR-10, #28) logs in with the e-mail in any letter case" time="0.016" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption at rest (NFR-10, #28) an old account with a plain e-mail still logs in and is converted on the way" name="e-mail encryption at rest (NFR-10, #28) an old account with a plain e-mail still logs in and is converted on the way" time="0.012" file="src/modules/auth/auth.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption at rest (NFR-10, #28) the same address cannot be registered twice, whatever the letter case" name="e-mail encryption at rest (NFR-10, #28) the same address cannot be registered twice, whatever the letter case" time="0.013" file="src/modules/auth/auth.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/v1/consents (FR-18)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:31:59" time="1.499" tests="14">
+    <testcase classname="GET /api/v1/consents (FR-18) returns the newest records first with user, purpose and policy version" name="GET /api/v1/consents (FR-18) returns the newest records first with user, purpose and policy version" time="0.01" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/consents (FR-18) pages through the results" name="GET /api/v1/consents (FR-18) pages through the results" time="0.006" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/consents (FR-18) rejects a page size above 100" name="GET /api/v1/consents (FR-18) rejects a page size above 100" time="0.005" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/consents (FR-18) is for DPO and ADMIN only" name="GET /api/v1/consents (FR-18) is for DPO and ADMIN only" time="0.011" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/audit (FR-17, FR-18) lists audit entries newest first, including anonymous failures" name="GET /api/v1/audit (FR-17, FR-18) lists audit entries newest first, including anonymous failures" time="0.005" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/audit (FR-17, FR-18) is read-only: there is no route to change or delete entries" name="GET /api/v1/audit (FR-17, FR-18) is read-only: there is no route to change or delete entries" time="0.01" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/audit (FR-17, FR-18) a USER cannot read the audit trail" name="GET /api/v1/audit (FR-17, FR-18) a USER cannot read the audit trail" time="0.004" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) passes every consent filter to the database query" name="search and filter (FR-19, #26) passes every consent filter to the database query" time="0.005" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) a date-only &apos;to&apos; includes that whole day; a full time is used as given" name="search and filter (FR-19, #26) a date-only &apos;to&apos; includes that whole day; a full time is used as given" time="0.001" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) empty filters are ignored" name="search and filter (FR-19, #26) empty filters are ignored" time="0.001" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) filters the audit trail by actor, action, outcome and dates" name="search and filter (FR-19, #26) filters the audit trail by actor, action, outcome and dates" time="0.004" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) rejects invalid filter values with 400" name="search and filter (FR-19, #26) rejects invalid filter values with 400" time="0.01" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) injection-looking text is only ever used as a search value (SEC-7)" name="search and filter (FR-19, #26) injection-looking text is only ever used as a search value (SEC-7)" time="0.005" file="src/modules/query/query.test.ts">
+    </testcase>
+    <testcase classname="search and filter (FR-19, #26) a full e-mail address is searched through its lookup hash (e-mails are encrypted, NFR-10)" name="search and filter (FR-19, #26) a full e-mail address is searched through its lookup hash (e-mails are encrypted, NFR-10)" time="0.005" file="src/modules/query/query.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="serveClient (#18)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:01" time="0.406" tests="3">
+    <testcase classname="serveClient (#18) in production: serves files, and index.html for app routes like /dashboard" name="serveClient (#18) in production: serves files, and index.html for app routes like /dashboard" time="0.121" file="src/lib/staticClient.test.ts">
+    </testcase>
+    <testcase classname="serveClient (#18) does nothing in development (Vite serves the app there)" name="serveClient (#18) does nothing in development (Vite serves the app there)" time="0.046" file="src/lib/staticClient.test.ts">
+    </testcase>
+    <testcase classname="serveClient (#18) does nothing when the app was not built" name="serveClient (#18) does nothing when the app was not built" time="0.059" file="src/lib/staticClient.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /api/v1/me/consents (FR-7, FR-8, FR-9)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:01" time="0.785" tests="17">
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) grants consent and records the current policy version and time" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) grants consent and records the current policy version and time" time="0.011" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) withdrawing adds a NEW record; the grant is kept (append-only, FR-11)" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) withdrawing adds a NEW record; the grant is kept (append-only, FR-11)" time="0.007" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) granting twice gets 409 CONSENT_UNCHANGED" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) granting twice gets 409 CONSENT_UNCHANGED" time="0.007" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) withdrawing something never granted gets 409" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) withdrawing something never granted gets 409" time="0.003" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) rejects an invalid action or purpose id with 400 (FR-9)" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) rejects an invalid action or purpose id with 400 (FR-9)" time="0.007" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) unknown purpose 404, inactive purpose 409" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) unknown purpose 404, inactive purpose 409" time="0.01" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) refuses consent while no policy is published" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) refuses consent while no policy is published" time="0.005" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/consents (FR-7, FR-8, FR-9) needs a USER login: 401 without, 403 for an ADMIN" name="POST /api/v1/me/consents (FR-7, FR-8, FR-9) needs a USER login: 401 without, 403 for an ADMIN" time="0.005" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="hash chain and audit (FR-10, FR-11, SEC-6) each record points to the hash of the previous one, starting from genesis" name="hash chain and audit (FR-10, FR-11, SEC-6) each record points to the hash of the previous one, starting from genesis" time="0.008" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="hash chain and audit (FR-10, FR-11, SEC-6) writes an audit entry for every decision, in the same transaction" name="hash chain and audit (FR-10, FR-11, SEC-6) writes an audit entry for every decision, in the same transaction" time="0.006" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="hash chain and audit (FR-10, FR-11, SEC-6) if the audit entry fails, the request fails (nothing half-saved is reported as success)" name="hash chain and audit (FR-10, FR-11, SEC-6) if the audit entry fails, the request fails (nothing half-saved is reported as success)" time="0.013" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents (FR-4) shows every active purpose; nothing is pre-ticked" name="GET /api/v1/me/consents (FR-4) shows every active purpose; nothing is pre-ticked" time="0.016" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents (FR-4) shows the latest decision per purpose, only for the logged-in user" name="GET /api/v1/me/consents (FR-4) shows the latest decision per purpose, only for the logged-in user" time="0.019" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents/history (FR-12) lists every decision newest first, with purpose and policy version" name="GET /api/v1/me/consents/history (FR-12) lists every decision newest first, with purpose and policy version" time="0.01" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents/history (FR-12) shows only the logged-in user&apos;s own records" name="GET /api/v1/me/consents/history (FR-12) shows only the logged-in user&apos;s own records" time="0.004" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents/history (FR-12) respects ?limit and rejects a bad one" name="GET /api/v1/me/consents/history (FR-12) respects ?limit and rejects a bad one" time="0.01" file="src/modules/consents/consents.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/consents/history (FR-12) needs a USER login" name="GET /api/v1/me/consents/history (FR-12) needs a USER login" time="0.004" file="src/modules/consents/consents.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/v1/purposes (FR-4)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:02" time="0.649" tests="13">
+    <testcase classname="GET /api/v1/purposes (FR-4) needs a login" name="GET /api/v1/purposes (FR-4) needs a login" time="0.015" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/purposes (FR-4) lists only active purposes, sorted by name" name="GET /api/v1/purposes (FR-4) lists only active purposes, sorted by name" time="0.014" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/purposes (FR-4) ?all=true shows deactivated purposes to an ADMIN but not to a USER" name="GET /api/v1/purposes (FR-4) ?all=true shows deactivated purposes to an ADMIN but not to a USER" time="0.008" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/purposes (FR-6) an ADMIN can create a purpose; the code is stored in capitals" name="POST /api/v1/purposes (FR-6) an ADMIN can create a purpose; the code is stored in capitals" time="0.005" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/purposes (FR-6) a USER gets 403" name="POST /api/v1/purposes (FR-6) a USER gets 403" time="0.003" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/purposes (FR-6) the same code twice gets 409 PURPOSE_CODE_TAKEN" name="POST /api/v1/purposes (FR-6) the same code twice gets 409 PURPOSE_CODE_TAKEN" time="0.006" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/purposes (FR-6) rejects a bad code and missing fields with 400" name="POST /api/v1/purposes (FR-6) rejects a bad code and missing fields with 400" time="0.004" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an ADMIN can rename a purpose but not change its code" name="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an ADMIN can rename a purpose but not change its code" time="0.006" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an empty update gets 400" name="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an empty update gets 400" time="0.005" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an unknown id gets 404, a malformed id gets 400" name="PATCH /api/v1/purposes/:id and /deactivate (FR-6) an unknown id gets 404, a malformed id gets 400" time="0.005" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/purposes/:id and /deactivate (FR-6) deactivating hides the purpose from users but keeps it in the database" name="PATCH /api/v1/purposes/:id and /deactivate (FR-6) deactivating hides the purpose from users but keeps it in the database" time="0.008" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/purposes/:id and /deactivate (FR-6) a USER cannot edit or deactivate" name="PATCH /api/v1/purposes/:id and /deactivate (FR-6) a USER cannot edit or deactivate" time="0.007" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+    <testcase classname="audit trail (FR-17) every admin change writes an audit entry with the admin as actor" name="audit trail (FR-17) every admin change writes an audit entry with the admin as actor" time="0.007" file="src/modules/purposes/purposes.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="verifyIntegrity (#27)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:03" time="0.618" tests="8">
+    <testcase classname="verifyIntegrity (#27) reports both chains intact, across more than one batch" name="verifyIntegrity (#27) reports both chains intact, across more than one batch" time="0.092" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="verifyIntegrity (#27) an empty database is fine" name="verifyIntegrity (#27) an empty database is fine" time="0" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="verifyIntegrity (#27) detects a changed audit entry (someone edited the action in the database)" name="verifyIntegrity (#27) detects a changed audit entry (someone edited the action in the database)" time="0.002" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="verifyIntegrity (#27) detects a changed consent decision" name="verifyIntegrity (#27) detects a changed consent decision" time="0.001" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="verifyIntegrity (#27) detects a deleted row (the next row no longer links back)" name="verifyIntegrity (#27) detects a deleted row (the next row no longer links back)" time="0.001" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="verifyIntegrity (#27) detects a row whose hash was recomputed to hide a change" name="verifyIntegrity (#27) detects a row whose hash was recomputed to hide a change" time="0.001" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/audit/verify (#27) returns the report and logs that a check was made" name="GET /api/v1/audit/verify (#27) returns the report and logs that a check was made" time="0.007" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/audit/verify (#27) needs DPO or ADMIN" name="GET /api/v1/audit/verify (#27) needs DPO or ADMIN" time="0.003" file="src/modules/audit/integrity.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="notices on publish (FR-16)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:03" time="0.586" tests="9">
+    <testcase classname="notices on publish (FR-16) notifies only users with a current grant under an older version" name="notices on publish (FR-16) notifies only users with a current grant under an older version" time="0.001" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="notices on publish (FR-16) publishing does not change any existing consent record" name="notices on publish (FR-16) publishing does not change any existing consent record" time="0" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="notices on publish (FR-16) does not create the same notice twice" name="notices on publish (FR-16) does not create the same notice twice" time="0.001" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/notices shows the new version and the purposes to review" name="GET /api/v1/me/notices shows the new version and the purposes to review" time="0.007" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/me/notices a user without affected consents has no notice" name="GET /api/v1/me/notices a user without affected consents has no notice" time="0.006" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/notices/:id/reconfirm adds a new GRANTED record under v2 for each affected purpose and closes the notice" name="POST /api/v1/me/notices/:id/reconfirm adds a new GRANTED record under v2 for each affected purpose and closes the notice" time="0.009" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/notices/:id/reconfirm cannot answer the same notice twice, or someone else&apos;s notice" name="POST /api/v1/me/notices/:id/reconfirm cannot answer the same notice twice, or someone else&apos;s notice" time="0.012" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/notices/:id/ack closes the notice without new consent records" name="POST /api/v1/me/notices/:id/ack closes the notice without new consent records" time="0.004" file="src/modules/notices/notices.test.ts">
+    </testcase>
+    <testcase classname="POST /api/v1/me/notices/:id/ack needs a USER login and a valid id" name="POST /api/v1/me/notices/:id/ack needs a USER login and a valid id" time="0.011" file="src/modules/notices/notices.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="backup (#29)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:04" time="0.111" tests="9">
+    <testcase classname="backup (#29) exports every table with row counts and turns BigInt ids into text" name="backup (#29) exports every table with row counts and turns BigInt ids into text" time="0.002" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="backup (#29) names files by UTC time, safe for Windows" name="backup (#29) names files by UTC time, safe for Windows" time="0.001" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="restore (#29) restores into an empty database in foreign-key order and resets the id sequences" name="restore (#29) restores into an empty database in foreign-key order and resets the id sequences" time="0.003" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="restore (#29) keeps ids, hashes and dates exactly (so the hash chains stay valid)" name="restore (#29) keeps ids, hashes and dates exactly (so the hash chains stay valid)" time="0.001" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="restore (#29) refuses to restore over existing data" name="restore (#29) refuses to restore over existing data" time="0.014" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="restore (#29) rejects files that are not our backups" name="restore (#29) rejects files that are not our backups" time="0.002" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="restore (#29) revive leaves unknown fields untouched" name="restore (#29) revive leaves unknown fields untouched" time="0.001" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="retention (NFR-8) defaults to 3 years" name="retention (NFR-8) defaults to 3 years" time="0" file="src/scripts/backup.test.ts">
+    </testcase>
+    <testcase classname="retention (NFR-8) records inside the period are protected, older ones are not" name="retention (NFR-8) records inside the period are protected, older ones are not" time="0.001" file="src/scripts/backup.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/v1/users (SEC-4)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:04" time="0.628" tests="9">
+    <testcase classname="GET /api/v1/users (SEC-4) lists users for an admin, without password hashes" name="GET /api/v1/users (SEC-4) lists users for an admin, without password hashes" time="0.008" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/users (SEC-4) searches by name/e-mail and filters by role" name="GET /api/v1/users (SEC-4) searches by name/e-mail and filters by role" time="0.012" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/users (SEC-4) is refused for USER and DPO" name="GET /api/v1/users (SEC-4) is refused for USER and DPO" time="0.007" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/users/:id/role (SEC-4) changes the role, ends the user&apos;s sessions and audits the change" name="PATCH /api/v1/users/:id/role (SEC-4) changes the role, ends the user&apos;s sessions and audits the change" time="0.012" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/users/:id/role (SEC-4) an admin cannot change his own role" name="PATCH /api/v1/users/:id/role (SEC-4) an admin cannot change his own role" time="0.004" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/users/:id/role (SEC-4) rejects unknown roles and users; non-admins are refused" name="PATCH /api/v1/users/:id/role (SEC-4) rejects unknown roles and users; non-admins are refused" time="0.011" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="PATCH /api/v1/users/:id/role (SEC-4) setting the same role again changes nothing and is not audited" name="PATCH /api/v1/users/:id/role (SEC-4) setting the same role again changes nothing and is not audited" time="0.004" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="deactivate / activate (SEC-4) deactivating blocks the account at once; activating restores it" name="deactivate / activate (SEC-4) deactivating blocks the account at once; activating restores it" time="0.01" file="src/modules/users/admin.test.ts">
+    </testcase>
+    <testcase classname="deactivate / activate (SEC-4) an admin cannot deactivate himself" name="deactivate / activate (SEC-4) an admin cannot deactivate himself" time="0.003" file="src/modules/users/admin.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="consent state at a past moment (FR-20, #16)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:05" time="0.578" tests="8">
+    <testcase classname="consent state at a past moment (FR-20, #16) before any decision: nothing was given, policy 1.0 was in force" name="consent state at a past moment (FR-20, #16) before any decision: nothing was given, policy 1.0 was in force" time="0.008" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) on 15 Oct: both granted under v1.0" name="consent state at a past moment (FR-20, #16) on 15 Oct: both granted under v1.0" time="0.004" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) on 21 Oct: policy 2.0 is in force but the old consents still stand" name="consent state at a past moment (FR-20, #16) on 21 Oct: policy 2.0 is in force but the old consents still stand" time="0.005" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) exactly at the withdrawal instant the withdrawal counts (&apos;at or before&apos;)" name="consent state at a past moment (FR-20, #16) exactly at the withdrawal instant the withdrawal counts (&apos;at or before&apos;)" time="0.007" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) includes purposes deactivated later, but not ones created later" name="consent state at a past moment (FR-20, #16) includes purposes deactivated later, but not ones created later" time="0.006" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) logs that the DPO looked at the user&apos;s data" name="consent state at a past moment (FR-20, #16) logs that the DPO looked at the user&apos;s data" time="0.006" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="consent state at a past moment (FR-20, #16) rejects future and invalid moments, unknown users, and non-DPO callers" name="consent state at a past moment (FR-20, #16) rejects future and invalid moments, unknown users, and non-DPO callers" time="0.016" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/users/lookup finds a user by e-mail (case-insensitive) or says 404" name="GET /api/v1/users/lookup finds a user by e-mail (case-insensitive) or says 404" time="0.012" file="src/modules/users/timeTravel.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/v1/health" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:05" time="0.684" tests="4">
+    <testcase classname="GET /api/v1/health returns 200 and db=up when the database answers" name="GET /api/v1/health returns 200 and db=up when the database answers" time="0.035" file="src/app.test.ts">
+    </testcase>
+    <testcase classname="GET /api/v1/health returns 503 and db=down when the database is unreachable" name="GET /api/v1/health returns 503 and db=down when the database is unreachable" time="0.009" file="src/app.test.ts">
+    </testcase>
+    <testcase classname="security basics sets security headers and hides the framework" name="security basics sets security headers and hides the framework" time="0.008" file="src/app.test.ts">
+    </testcase>
+    <testcase classname="security basics returns the standard JSON error for unknown routes" name="security basics returns the standard JSON error for unknown routes" time="0.024" file="src/app.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="requireRole (SEC-2)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:06" time="0.643" tests="9">
+    <testcase classname="requireRole (SEC-2) 401 when nobody is logged in" name="requireRole (SEC-2) 401 when nobody is logged in" time="0.009" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireRole (SEC-2) 403 FORBIDDEN for a USER on an admin route" name="requireRole (SEC-2) 403 FORBIDDEN for a USER on an admin route" time="0.005" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireRole (SEC-2) lets an ADMIN through" name="requireRole (SEC-2) lets an ADMIN through" time="0.004" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireRole (SEC-2) accepts any of several roles" name="requireRole (SEC-2) accepts any of several roles" time="0.01" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireRole (SEC-2) refuses to be created without roles" name="requireRole (SEC-2) refuses to be created without roles" time="0.015" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireSelfOrRole (SEC-2: a user sees only his or her own data) a USER can open their own data" name="requireSelfOrRole (SEC-2: a user sees only his or her own data) a USER can open their own data" time="0.004" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireSelfOrRole (SEC-2: a user sees only his or her own data) a USER cannot open someone else&apos;s data" name="requireSelfOrRole (SEC-2: a user sees only his or her own data) a USER cannot open someone else&apos;s data" time="0.003" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="requireSelfOrRole (SEC-2: a user sees only his or her own data) DPO and ADMIN can open anyone&apos;s data" name="requireSelfOrRole (SEC-2: a user sees only his or her own data) DPO and ADMIN can open anyone&apos;s data" time="0.006" file="src/middleware/requireRole.test.ts">
+    </testcase>
+    <testcase classname="denied access is audited (SEC-2, FR-17) writes an ACCESS_DENIED entry" name="denied access is audited (SEC-2, FR-17) writes an ACCESS_DENIED entry" time="0.006" file="src/middleware/requireRole.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="seed (#10)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:07" time="0.12" tests="3">
+    <testcase classname="seed (#10) creates 3 demo users with hashed passwords, 4 purposes and a published policy 1.0" name="seed (#10) creates 3 demo users with hashed passwords, 4 purposes and a published policy 1.0" time="0.03" file="src/scripts/seed.test.ts">
+    </testcase>
+    <testcase classname="seed (#10) running it a second time adds nothing" name="seed (#10) running it a second time adds nothing" time="0.009" file="src/scripts/seed.test.ts">
+    </testcase>
+    <testcase classname="seed (#10) does not add a policy when one already exists" name="seed (#10) does not add a policy when one already exists" time="0.005" file="src/scripts/seed.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="canonicalJson" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:07" time="0.292" tests="6">
+    <testcase classname="canonicalJson gives the same text whatever the key order" name="canonicalJson gives the same text whatever the key order" time="0.002" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+    <testcase classname="canonicalJson writes dates as ISO strings" name="canonicalJson writes dates as ISO strings" time="0" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+    <testcase classname="appendAudit the first entry points to the genesis hash" name="appendAudit the first entry points to the genesis hash" time="0.001" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+    <testcase classname="appendAudit each entry points to the hash of the one before (a chain)" name="appendAudit each entry points to the hash of the one before (a chain)" time="0.001" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+    <testcase classname="appendAudit takes the chain lock before reading the last entry" name="appendAudit takes the chain lock before reading the last entry" time="0.001" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+    <testcase classname="appendAudit the stored hash can be recomputed, and any change to the entry is detected" name="appendAudit the stored hash can be recomputed, and any change to the entry is detected" time="0.001" file="src/modules/audit/audit.service.test.ts">
+    </testcase>
+  </testsuite>
+  <testsuite name="e-mail encryption (NFR-10)" errors="0" failures="0" skipped="0" timestamp="2026-11-03T04:32:07" time="0.113" tests="8">
+    <testcase classname="e-mail encryption (NFR-10) round-trips, and the stored text does not reveal the address" name="e-mail encryption (NFR-10) round-trips, and the stored text does not reveal the address" time="0.002" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption (NFR-10) encrypting the same address twice gives different text (random IV)" name="e-mail encryption (NFR-10) encrypting the same address twice gives different text (random IV)" time="0.001" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption (NFR-10) the lookup hash is the same for the same address in any case, and different for others" name="e-mail encryption (NFR-10) the lookup hash is the same for the same address in any case, and different for others" time="0.001" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption (NFR-10) a changed ciphertext is rejected (AES-GCM authentication)" name="e-mail encryption (NFR-10) a changed ciphertext is rejected (AES-GCM authentication)" time="0.012" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption (NFR-10) plain e-mails from before encryption are returned as they are" name="e-mail encryption (NFR-10) plain e-mails from before encryption are returned as they are" time="0.001" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="e-mail encryption (NFR-10) uses EMAIL_ENCRYPTION_KEY when set: data encrypted with one key cannot be read with another" name="e-mail encryption (NFR-10) uses EMAIL_ENCRYPTION_KEY when set: data encrypted with one key cannot be read with another" time="0.011" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="log redaction (NFR-9) never writes passwords, e-mails, tokens or cookies to the log" name="log redaction (NFR-9) never writes passwords, e-mails, tokens or cookies to the log" time="0.013" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+    <testcase classname="UTC timestamps (NFR-13) times are sent as UTC ISO strings ending in Z" name="UTC timestamps (NFR-13) times are sent as UTC ISO strings ending in Z" time="0.001" file="src/lib/emailCrypto.test.ts">
+    </testcase>
+  </testsuite>
+</testsuites>

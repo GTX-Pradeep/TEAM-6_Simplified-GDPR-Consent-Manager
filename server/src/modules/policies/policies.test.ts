@@ -209,10 +209,21 @@ describe("reading policies (FR-5)", () => {
     expect((await request(app).get("/api/v1/policies").set("Cookie", asUser)).status).toBe(403);
   });
 
-  it("GET /:id returns any version to a logged-in user; needs login", async () => {
+  it("GET /:id returns a published version to a logged-in user; needs login", async () => {
     const { body } = await createDraft(v1);
+    await publish(body.policy.id);
     expect((await request(app).get(`/api/v1/policies/${body.policy.id}`).set("Cookie", asUser)).status).toBe(200);
     expect((await request(app).get(`/api/v1/policies/${body.policy.id}`)).status).toBe(401);
+  });
+
+  it("GET /:id hides a DRAFT from a USER (404) but shows it to ADMIN and DPO (FR-13)", async () => {
+    const { body } = await createDraft(v1);
+    const url = `/api/v1/policies/${body.policy.id}`;
+    const asUserRes = await request(app).get(url).set("Cookie", asUser);
+    expect(asUserRes.status).toBe(404);
+    expect(asUserRes.body.error.code).toBe("POLICY_NOT_FOUND");
+    expect((await request(app).get(url).set("Cookie", asAdmin)).status).toBe(200);
+    expect((await request(app).get(url).set("Cookie", asDpo)).status).toBe(200);
   });
 });
 

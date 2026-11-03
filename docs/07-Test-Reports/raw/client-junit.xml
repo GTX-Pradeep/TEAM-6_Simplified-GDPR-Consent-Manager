@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="53" failures="0" errors="0" time="19.219">
+    <testsuite name="src/App.test.tsx" timestamp="2026-11-03T04:32:33.483Z" hostname="vm" tests="3" failures="0" errors="0" skipped="0" time="0.203104575">
+        <testcase classname="src/App.test.tsx" name="App &gt; renders the home page with the main heading" time="0.138656972">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+Warning: An update to StatusPill inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at StatusPill (/home/claude/skeleton/client/src/components/StatusPill.tsx:8:51)
+    at div
+    at div
+    at header
+    at div
+    at Layout (/home/claude/skeleton/client/src/components/Layout.tsx:11:19)
+    at AuthProvider (/home/claude/skeleton/client/src/auth/AuthContext.tsx:8:25)
+    at App
+    at Router (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1207:17)
+    at MemoryRouter (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1101:7)
+Warning: An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at AuthProvider (/home/claude/skeleton/client/src/auth/AuthContext.tsx:8:25)
+    at App
+    at Router (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1207:17)
+    at MemoryRouter (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1101:7)
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; shows live API status once the health check returns" time="0.041126989">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; renders the not-found page for unknown routes" time="0.021346837">
+            <system-err>
+Warning: An update to StatusPill inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at StatusPill (/home/claude/skeleton/client/src/components/StatusPill.tsx:8:51)
+    at div
+    at div
+    at header
+    at div
+    at Layout (/home/claude/skeleton/client/src/components/Layout.tsx:11:19)
+    at AuthProvider (/home/claude/skeleton/client/src/auth/AuthContext.tsx:8:25)
+    at App
+    at Router (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1207:17)
+    at MemoryRouter (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1101:7)
+Warning: An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you&apos;re testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at AuthProvider (/home/claude/skeleton/client/src/auth/AuthContext.tsx:8:25)
+    at App
+    at Router (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1207:17)
+    at MemoryRouter (/home/claude/skeleton/node_modules/react-router/dist/umd/react-router.development.js:1101:7)
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/auth/auth.test.tsx" timestamp="2026-11-03T04:32:33.486Z" hostname="vm" tests="10" failures="0" errors="0" skipped="0" time="0.832752683">
+        <testcase classname="src/auth/auth.test.tsx" name="login (FR-2) &gt; a USER lands on the consent dashboard" time="0.233877402">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="login (FR-2) &gt; an ADMIN lands on the admin console" time="0.105258171">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="login (FR-2) &gt; shows the server&apos;s message for wrong credentials or a locked account" time="0.093083847">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="login (FR-2) &gt; asks for both fields before calling the API" time="0.044387072">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="register (FR-1) &gt; validates the form like the API does" time="0.001589869">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="register (FR-1) &gt; creates the account and opens the dashboard" time="0.137687693">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="register (FR-1) &gt; shows &apos;e-mail already used&apos; from the API" time="0.068433575">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="protected pages and logout (FR-3) &gt; sends a visitor who is not logged in to the login page" time="0.028940633">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="protected pages and logout (FR-3) &gt; sends a USER away from the admin console to their own dashboard" time="0.030303847">
+        </testcase>
+        <testcase classname="src/auth/auth.test.tsx" name="protected pages and logout (FR-3) &gt; logging out ends the session and returns to the login page" time="0.086301566">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/PolicyNoticeBanner.test.tsx" timestamp="2026-11-03T04:32:33.490Z" hostname="vm" tests="4" failures="0" errors="0" skipped="0" time="0.397968527">
+        <testcase classname="src/components/PolicyNoticeBanner.test.tsx" name="policy-change notice (#20) &gt; tells the user what changed and which consents were given under the old version" time="0.170376474">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/PolicyNoticeBanner.test.tsx" name="policy-change notice (#20) &gt; &apos;Keep my choices&apos; re-confirms and refreshes the cards" time="0.103167705">
+        </testcase>
+        <testcase classname="src/components/PolicyNoticeBanner.test.tsx" name="policy-change notice (#20) &gt; &apos;I&apos;ve reviewed them&apos; closes the notice" time="0.076892791">
+        </testcase>
+        <testcase classname="src/components/PolicyNoticeBanner.test.tsx" name="policy-change notice (#20) &gt; shows nothing when there is no notice" time="0.045097427">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/AdminUsersPage.test.tsx" timestamp="2026-11-03T04:32:33.492Z" hostname="vm" tests="6" failures="0" errors="0" skipped="0" time="0.688841705">
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; lists users; the admin&apos;s own row cannot be changed" time="0.258616781">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; changing a role calls the API and shows a confirmation" time="0.117582396">
+        </testcase>
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; deactivates an account" time="0.128384315">
+        </testcase>
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; searches" time="0.093372231">
+        </testcase>
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; the admin tabs link Policies and Users" time="0.054667379">
+        </testcase>
+        <testcase classname="src/pages/AdminUsersPage.test.tsx" name="Admin: users and roles (#23) &gt; a DPO cannot open it" time="0.034298219">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/DashboardPage.test.tsx" timestamp="2026-11-03T04:32:33.494Z" hostname="vm" tests="5" failures="0" errors="0" skipped="0" time="0.7652298">
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="Consent Dashboard (#9) &gt; shows one card per purpose; nothing is pre-ticked" time="0.390467149">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="Consent Dashboard (#9) &gt; Grant calls the API and the card turns to Granted" time="0.129777792">
+        </testcase>
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="Consent Dashboard (#9) &gt; Withdraw sends WITHDRAWN" time="0.062509513">
+        </testcase>
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="Consent Dashboard (#9) &gt; shows the API error if saving fails" time="0.082833916">
+        </testcase>
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="Consent Dashboard (#9) &gt; disables the buttons while no policy is published" time="0.095718914">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/DpoConsolePage.test.tsx" timestamp="2026-11-03T04:32:33.495Z" hostname="vm" tests="13" failures="0" errors="0" skipped="0" time="1.363160791">
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="DPO console (#22) &gt; shows consent records with user, purpose, decision and policy version" time="0.30584166">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="DPO console (#22) &gt; pages forward" time="0.165112938">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="DPO console (#22) &gt; switches to the audit trail tab" time="0.103966687">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="DPO console (#22) &gt; has no edit or delete controls (read-only)" time="0.060533917">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="DPO console (#22) &gt; a USER is sent away from the DPO console" time="0.018196579">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="search and filter (#26, FR-19) &gt; sends only the filled-in consent filters and starts again at page 1" time="0.099093336">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="search and filter (#26, FR-19) &gt; Clear removes the filters" time="0.087020684">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="search and filter (#26, FR-19) &gt; the audit tab has its own filters" time="0.090154839">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="search and filter (#26, FR-19) &gt; says when nothing matches" time="0.099428546">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="Verify integrity (#27, SEC-6) &gt; shows a green result when both chains are intact" time="0.088525004">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="Verify integrity (#27, SEC-6) &gt; points to the first broken record when something was changed" time="0.063024221">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="Time travel (#16, FR-20) &gt; looks up the user and shows what they had agreed to at that moment" time="0.095050508">
+        </testcase>
+        <testcase classname="src/pages/DpoConsolePage.test.tsx" name="Time travel (#16, FR-20) &gt; shows the API error for an unknown e-mail" time="0.084219073">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/HistoryPage.test.tsx" timestamp="2026-11-03T04:32:33.501Z" hostname="vm" tests="4" failures="0" errors="0" skipped="0" time="0.331559065">
+        <testcase classname="src/pages/HistoryPage.test.tsx" name="Consent history (#19) &gt; shows every decision newest first, grouped by day, with the policy version" time="0.2226737">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/HistoryPage.test.tsx" name="Consent history (#19) &gt; shows a friendly message when there is no history yet" time="0.036440845">
+        </testcase>
+        <testcase classname="src/pages/HistoryPage.test.tsx" name="Consent history (#19) &gt; the dashboard links to the history page" time="0.068645647">
+        </testcase>
+        <testcase classname="src/pages/HistoryPage.test.tsx" name="Consent history (#19) &gt; groupByDay keeps order and splits by calendar day" time="0.001944513">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/policies.test.tsx" timestamp="2026-11-03T04:32:33.503Z" hostname="vm" tests="8" failures="0" errors="0" skipped="0" time="0.690761127">
+        <testcase classname="src/pages/policies.test.tsx" name="policy page (FR-5) &gt; shows the current version, its date and text" time="0.189689345">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="policy page (FR-5) &gt; says so when nothing is published yet" time="0.028512384">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; lists versions; published ones are locked, drafts can be edited and published" time="0.098068228">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; creates a new draft with the next version number pre-filled" time="0.173739755">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; publishing asks for confirmation first" time="0.093408869">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; shows field errors from the API" time="0.079660211">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; a USER cannot open the admin screen" time="0.02438121">
+        </testcase>
+        <testcase classname="src/pages/policies.test.tsx" name="admin policy editor (FR-13, FR-14, FR-15) &gt; suggests the next major version" time="0.000819055">
+        </testcase>
+    </testsuite>
+</testsuites>

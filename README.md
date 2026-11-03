@@ -6,7 +6,7 @@ A full-stack web application for recording, reviewing and withdrawing user conse
 **versioned privacy policies**, an **append-only, SHA-256 hash-chained audit trail** and **point-in-time ("time travel")
 consent queries** for auditors.
 
-**Live demo:** _add the Render link here after deploying (see [Deployment](docs/05-Operations/Deployment.md))_ ·
+**Live demo:** **https://gdpr-consent-manager.onrender.com** (free Render instance: the first visit after a quiet period can take ~50 s to wake up) ·
 demo logins `user@demo.com`, `admin@demo.com`, `dpo@demo.com` (password `Demo@12345`)
 
 > Academic software-engineering project (Team 6). It demonstrates GDPR-style consent management; it is not a legal
@@ -165,7 +165,9 @@ Errors always look like `{"error": {"code": "EMAIL_TAKEN", "message": "...", "re
 
 - [Software Requirements Specification (SRS)](docs/01-SRS/)
 - [Software Architecture & Design (SAD)](docs/02-SAD/)
-- [Software Test Plan](docs/03-Test-Plan/)
+- [Software Test Plan](docs/03-Test-Plan/) (v1.1 with executed results)
+- [Test reports](docs/07-Test-Reports/): Unit Test, Code Coverage, Branch Coverage and System Validation reports
+- [Performance test report](docs/06-Quality/Performance_Test_Report.md) and [Accessibility & usability report](docs/06-Quality/Accessibility_and_Usability_Report.md)
 
 ## Team 6
 
