@@ -15,6 +15,8 @@ const USERS = Number(__ENV.USERS || 50);
 const PASSWORD = "Perf@12345";
 
 export const options = {
+  // keep each virtual user's session cookie between iterations (k6 clears the jar by default)
+  noCookiesReset: true,
   scenarios: {
     consent_actions: {
       executor: "constant-vus",
